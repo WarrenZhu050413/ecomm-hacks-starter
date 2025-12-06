@@ -15,7 +15,7 @@ Studio Tenwu
 
 ### Demo
 - **Live URL:**
-    - Advertiser Console: https://ecomm-hacks-starter.vercel.app/advertiser
+    - Advertiser Console: https://ecomm-hacks-starter.vercel.app/console
     - Consumer Network: https://ecomm-hacks-starter.vercel.app/consumer
 - **Demo Video:** N/A
 
