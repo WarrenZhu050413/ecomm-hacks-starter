@@ -16,6 +16,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import OnboardingFlow from '@/components/OnboardingFlow'
 import { ConsumerRoute } from './ConsumerRoute'
+import { GenerativeGalleryRoute } from './GenerativeGalleryRoute'
 import { NewSessionRoute } from './NewSessionRoute'
 import { CanvasRoute } from './CanvasRoute'
 import { NotFound } from './NotFound'
@@ -47,6 +48,14 @@ export const router = createBrowserRouter([
   {
     path: '/consumer/debug',
     element: <ConsumerRoute debugMode />,
+  },
+  {
+    path: '/gallery',
+    element: <GenerativeGalleryRoute />,
+  },
+  {
+    path: '/gallery/debug',
+    element: <GenerativeGalleryRoute debugMode />,
   },
   {
     path: '/prototype',
