@@ -164,14 +164,14 @@ export function ProductOverlay({
       setBuyNowLoading(false)
       setOrderNumber('RVR-' + Math.random().toString(36).substring(2, 8).toUpperCase())
       setShowConfirmation(true)
-      onBuyNow() // Notify parent
+      // Don't call onBuyNow yet - wait until confirmation is dismissed
     }, 1800)
   }
 
   // Handle confirmation close
   const handleConfirmationClose = () => {
     setShowConfirmation(false)
-    onClose()
+    onBuyNow() // Now notify parent to close
   }
 
   // Format price
