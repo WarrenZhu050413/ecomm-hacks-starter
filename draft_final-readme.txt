@@ -75,6 +75,51 @@ If you've ever spent an hour browsing not to shop but to figure out your own tas
 
 ---
 
+## Positioning: Are.na + Pinterest
+
+We take **Are.na's intentionality**—slow curation, text alongside images, "an API for your mind"—and combine it with **Pinterest's visual discovery and commerce layer**.
+
+But unlike either, **our content is generative**. You write about what draws you; the AI creates scenes that match. Products appear *inside* those scenes, not as ads on top of them.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   ARE.NA                              PINTEREST                             │
+│   ──────                              ─────────                             │
+│   • Intentional curation              • Visual discovery                    │
+│   • Text + images together            • Shoppable products                  │
+│   • No algorithm                      • Algorithm-driven                    │
+│   • Slow, contemplative               • Fast, addictive                     │
+│   • Collect existing content          • Collect existing content            │
+│                                                                             │
+│                           ┌───────────┐                                     │
+│                           │  REVERIE  │                                     │
+│                           └─────┬─────┘                                     │
+│                                 │                                           │
+│                    ┌────────────┴────────────┐                              │
+│                    │                         │                              │
+│                    ▼                         ▼                              │
+│        From Are.na:              From Pinterest:                            │
+│        • Intentionality          • Visual discovery                         │
+│        • Text + images           • Commerce layer                           │
+│        • Slow pace               • Product integration                      │
+│                                                                             │
+│                    + NEW (neither has this):                                │
+│                    • AI-generated content                                   │
+│                    • Writing → feed personalization                         │
+│                    • Products native to scenes                              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+| Platform | Discovery | Reflection | Commerce | Content |
+|----------|-----------|------------|----------|---------|
+| Are.na | ✗ | ✓ | ✗ | Curated |
+| Pinterest | ✓ | ✗ | ✓ | Curated |
+| **Reverie** | ✓ | ✓ | ✓ | **Generated** |
+
+---
+
 ## What We Built
 
 **Reverie** is a curative taste platform that combines:
@@ -125,6 +170,52 @@ If you've ever spent an hour browsing not to shop but to figure out your own tas
 ```
 
 **The key insight:** LLMs need language to understand nuance. "Golden hour Parisian café with worn leather and old books" contains more signal than 1,000 scroll interactions. By combining visual discovery with written reflection, we give the AI—and you—a deeper understanding of your taste.
+
+---
+
+## Zero-Party Taste Data: Our Moat
+
+The writing pane isn't just a feature—it's the highest-quality personalization signal on the internet.
+
+**Zero-party data** is a term [coined by Forrester Research in 2019](https://www.forrester.com/blogs/straight-from-the-source-collecting-zero-party-data-from-customers/) for data that customers "intentionally and proactively share with a brand." Unlike behavioral data (clicks, scroll depth, dwell time), zero-party data requires no inference—users tell you exactly what they want.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  BEHAVIORAL DATA (what Pinterest has):                                      │
+│  → User saved 47 pins with warm lighting                                    │
+│  → User spent 3.2 seconds on mid-century furniture                          │
+│  → Inference: "Probably likes warm, mid-century stuff?"                     │
+│                                                                             │
+│  ZERO-PARTY TASTE DATA (what Reverie has):                                  │
+│  → "I keep saving images with that 4pm Paris light.                         │
+│     Something about worn leather and old books.                             │
+│     I want my apartment to feel like a Sunday                               │
+│     afternoon in late October."                                             │
+│  → No inference needed. User told you exactly.                              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Why This Matters
+
+| Signal Type | Example | Quality |
+|-------------|---------|---------|
+| Implicit (behavioral) | "Clicked on 5 sofas" | Low—[56% of cart visitors have no intent to buy](https://customerthink.com/why-intent-data-is-the-elixir-of-personalization/) |
+| Explicit (ratings) | "Liked this image" | Medium—you know *that*, not *why* |
+| **Zero-party (written)** | "I love the texture of linen in morning light" | **Highest**—captures nuance, emotion, context |
+
+### The Research
+
+- Brands using zero-party data see [conversion increases of 141-388%](https://www.singlegrain.com/digital-marketing/zero-party-data-methods-that-boost-personalization-by-217/)
+- [91% of consumers](https://www.singlegrain.com/digital-marketing/zero-party-data-methods-that-boost-personalization-by-217/) prefer brands that use their stated preferences
+- Forrester calls zero-party data ["gold"](https://www.salesforce.com/marketing/personalization/zero-party-data/)—"when a customer trusts a brand enough to provide this meaningful data, the brand doesn't have to infer what they want"
+
+### How Reverie Is Different
+
+Most zero-party collection looks like quizzes: "What's your style? A) Modern B) Traditional C) Eclectic"
+
+Ours is **continuous written reflection**—users articulate their taste in their own words, over time. The act of writing helps them understand themselves; it just happens to also be the best personalization signal possible.
 
 ---
 
