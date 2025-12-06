@@ -73,15 +73,14 @@ uv run python test_product_integration.py
 ```
 
 ### Screenshots
-
-![](./Consumer_Interface1.webp)
-
 ![](./Advertiser_Console1.webp)
-Advertisers can input demographics, preferred scenes, and a semantic description
+Advertisers can input demographics, preferred scenes, and a semantic description of scenes they want their product to appear in. 
 
 ![](./Advertiser_Console2.webp)
 Advertisers can then simulate the consumer shopping experience within the console, allowing them to fine-tune parameters.
 
+![](./Consumer_Interface1.webp)
+Consumers can browse posts that they are interested in, as well as write personal thoughts and things they want to see on the left third of the screen.
 
 ### Challenges We Faced
 
@@ -90,5 +89,4 @@ Advertisers can then simulate the consumer shopping experience within the consol
 
 ### What's Next
 
-- **Social network layer**: Build a Pinterest-like platform where users create and share mood boards, with every image potentially shoppable—network effects driving social commerce.
-- **Personalized feeds**: Use writing pane input and browsing behavior to curate images matching each user's aesthetic.
+- **Social network layer**: Building out a Pinterest-like platform where users can create and share mood boards, with every image potentially shoppable. This would also allow the effectiveness of the platform to compound with network effects.
