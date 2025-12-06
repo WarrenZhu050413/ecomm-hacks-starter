@@ -35,7 +35,7 @@ Studio Tenwu
 
 ### Key Features
 
-- **Product insertion into images** - Organic insertions of products into images
+- **Product insertion** - Organic insertions of products into images
 - **Gallery scrolling** - Pinterest-style scroll with staggered card layouts
 - **Mask-based hover detection** - Detects when user hovers or clicks on the product, showing translucent popup with the purchasing options
 - **Writing pane** - Users can describe their mood/vibe to interact with and personalize the feed
@@ -74,23 +74,19 @@ uv run python test_product_integration.py
 
 ### Screenshots
 
-*Consumer Gallery View*
-- Pinterest-style scrolling gallery with AI-generated lifestyle scenes
-- Products naturally integrated into each image
-- Hover detection highlights only the product area
+![](./Consumer_Interface1.webp)
 
-*Product Hover Interaction*
-- Subtle white highlight on product
-- Glassmorphic product card appears to the right
-- Brand, name, price, and Buy Now button
+![](./Advertiser_Console1.webp)
+Advertisers can input demographics, preferred scenes, and a semantic description
 
-*Mask Generation Pipeline*
-- Original product + Background scene → Nano Banana → Integrated scene + Product mask
+![](./Advertiser_Console2.webp)
+Advertisers can then simulate the consumer shopping experience within the console, allowing them to fine-tune parameters.
+
 
 ### Challenges We Faced
 
-- **Visual interfaces under time pressure**: Attention to detail within user interactions and aesthetics of pages
-- **Coordinate mapping**: CSS `object-fit: cover` crops images differently than the masks, requiring hover detection to consider offset.
+- **Visual interfaces within 24 hours**: Attention to detail within user interactions and aesthetics of pages were a definite priority
+- **Debugging coordinate mapping / race conditions**: CSS `object-fit: cover` crops images differently than the masks, requiring hover detection to consider offset.
 
 ### What's Next
 
