@@ -328,6 +328,7 @@ class GeminiService:
         image_data: bytes,
         image_mime_type: str = "image/png",
         model: str = "gemini-3-pro-image-preview",
+        reference_images: list[dict] | None = None,
     ) -> ImageResult:
         """Edit an existing image using Nano Banana.
 
@@ -336,6 +337,7 @@ class GeminiService:
             image_data: Raw image bytes
             image_mime_type: MIME type of the image
             model: Model to use
+            reference_images: Optional list of {"data": bytes, "mime_type": str} for reference
 
         Returns:
             ImageResult with edited image
@@ -349,18 +351,27 @@ class GeminiService:
             prompt_length=len(prompt),
             image_size_bytes=len(image_data),
             image_mime_type=image_mime_type,
+            reference_image_count=len(reference_images) if reference_images else 0,
         )
 
-        # Build content with both text and image
-        contents = [
-            types.Content(
-                role="user",
-                parts=[
-                    types.Part.from_text(text=prompt),
-                    types.Part.from_bytes(data=image_data, mime_type=image_mime_type),
-                ],
-            )
+        # Build parts: text first, then main image, then reference images
+        parts = [
+            types.Part.from_text(text=prompt),
+            types.Part.from_bytes(data=image_data, mime_type=image_mime_type),
         ]
+
+        # Add reference images if provided
+        if reference_images:
+            for ref_img in reference_images:
+                if ref_img.get("data"):
+                    parts.append(
+                        types.Part.from_bytes(
+                            data=ref_img["data"],
+                            mime_type=ref_img.get("mime_type", "image/jpeg"),
+                        )
+                    )
+
+        contents = [types.Content(role="user", parts=parts)]
 
         config = types.GenerateContentConfig(
             response_modalities=["TEXT", "IMAGE"],
