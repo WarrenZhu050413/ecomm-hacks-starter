@@ -8,7 +8,7 @@
  * - /consumer/debug → Consumer demo with debug mode
  * - /prototype → Paris Drafting Table (product placement testing)
  * - /prototype/v2 → DraftingTableV2
- * - /:configSlug → NewSessionRoute (prompts for name, creates session)
+  * - /:configSlug → NewSessionRoute (prompts for name, creates session)
  * - /:configSlug/:sessionSlug → CanvasRoute (loads and renders canvas)
  * - * → NotFound
  */

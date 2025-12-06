@@ -172,6 +172,8 @@ export default function Console() {
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
   // Track which scenes are waiting for image generation
   const [generatingImageIds, setGeneratingImageIds] = useState<Set<string>>(new Set())
+  // Track image generation progress (0-100)
+  const [imageGenProgress, setImageGenProgress] = useState(0)
 
   // Toast state
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -535,26 +537,15 @@ export default function Console() {
         throw new Error('No scenes generated')
       }
 
-      // Step 2: Add placeholder cards and track generating IDs
+      // Step 2: Generate images one at a time, only show when complete
       setGenerationPhase('generating-images')
+      setImageGenProgress(0)
 
-      const sceneIds = scenesData.scenes.map((s: { id: string }) => s.id)
-      setGeneratingImageIds(new Set(sceneIds))
-
-      // Add placeholder cards (no imageData yet)
-      const placeholders: ScenePlacement[] = scenesData.scenes.map((scene: { id: string; description: string; mood: string; scene_type?: string }) => ({
-        sceneId: scene.id,
-        description: scene.description,
-        mood: scene.mood,
-        sceneType: scene.scene_type || 'exploration',
-        imageData: '',  // Empty - shows loading state
-        mimeType: 'image/jpeg',
-      }))
-      setPlacements(prev => [...prev, ...placeholders])
-
-      // Step 3: Generate images one at a time for per-card feedback
+      const totalImages = scenesData.scenes.length
+      let completedCount = 0
       let successCount = 0
       let failCount = 0
+
       for (const scene of scenesData.scenes) {
         try {
           const imgResponse = await fetch(`${API_BASE}/api/placement/generate-images`, {
@@ -573,12 +564,16 @@ export default function Console() {
             const imgData = await imgResponse.json()
             const img = imgData.images?.[0]
             if (img) {
-              // Update the placeholder with real image
-              setPlacements(prev => prev.map(p =>
-                p.sceneId === scene.id
-                  ? { ...p, imageData: img.image_data, mimeType: img.mime_type }
-                  : p
-              ))
+              // Add completed image directly to placements
+              const newPlacement: ScenePlacement = {
+                sceneId: scene.id,
+                description: scene.description,
+                mood: scene.mood,
+                sceneType: scene.scene_type || 'exploration',
+                imageData: img.image_data,
+                mimeType: img.mime_type,
+              }
+              setPlacements(prev => [...prev, newPlacement])
               successCount++
             } else {
               failCount++
@@ -591,16 +586,10 @@ export default function Console() {
           failCount++
         }
 
-        // Remove from generating set
-        setGeneratingImageIds(prev => {
-          const next = new Set(prev)
-          next.delete(scene.id)
-          return next
-        })
+        // Update progress after each image (success or fail)
+        completedCount++
+        setImageGenProgress(Math.round((completedCount / totalImages) * 100))
       }
-
-      // Clean up failed placeholders (no imageData)
-      setPlacements(prev => prev.filter(p => p.imageData !== ''))
 
       setGenerationPhase('complete')
       if (failCount > 0) {
@@ -1276,17 +1265,17 @@ export default function Console() {
               <>
                 <span className="console-btn-loading">
                   <span className="console-btn-spinner" />
-                  {generationPhase === 'generating-scenes' ? 'Creating scenes...' : 'Generating images...'}
+                  {generationPhase === 'generating-scenes'
+                    ? 'Creating scenes... ~20s'
+                    : `Generating images... ${imageGenProgress}%`}
                 </span>
                 <span
                   key={generationPhase}
-                  className="console-btn-progress-bar timed"
-                  style={{
-                    // Scenes ~25s, Images ~30s per image (sequential generation)
-                    animationDuration: generationPhase === 'generating-scenes'
-                      ? '25s'
-                      : `${30 * imageCount}s`
-                  }}
+                  className={`console-btn-progress-bar ${generationPhase === 'generating-scenes' ? 'timed' : ''}`}
+                  style={generationPhase === 'generating-scenes'
+                    ? { animationDuration: '25s' }
+                    : { width: `${imageGenProgress}%`, transition: 'width 0.3s ease-out' }
+                  }
                 />
               </>
             ) : 'Generate Posts'}
@@ -1331,26 +1320,18 @@ export default function Console() {
                 {placements.map((placement, index) => (
                   <div
                     key={placement.sceneId || index}
-                    className={`console-placement-card ${placement.composedImage ? 'has-result' : ''} ${processingIds.has(placement.sceneId) || generatingImageIds.has(placement.sceneId) ? 'processing' : ''}`}
-                    onClick={() => placement.imageData ? openModal(placement) : undefined}
+                    className={`console-placement-card ${placement.composedImage ? 'has-result' : ''} ${processingIds.has(placement.sceneId) ? 'processing' : ''}`}
+                    onClick={() => openModal(placement)}
                   >
-                    {/* Show loading placeholder if no image yet */}
-                    {!placement.imageData ? (
-                      <div className="console-card-loading">
-                        <div className="console-spinner" />
-                        <span>Generating...</span>
-                      </div>
-                    ) : (
-                      <img
-                        src={placement.composedImage
-                          ? `data:${placement.mimeType};base64,${placement.composedImage}`
-                          : `data:${placement.mimeType};base64,${placement.imageData}`
-                        }
-                        alt={placement.description}
-                      />
-                    )}
+                    <img
+                      src={placement.composedImage
+                        ? `data:${placement.mimeType};base64,${placement.composedImage}`
+                        : `data:${placement.mimeType};base64,${placement.imageData}`
+                      }
+                      alt={placement.description}
+                    />
                     {/* Processing overlay for Phase 2 */}
-                    {processingIds.has(placement.sceneId) && placement.imageData && (
+                    {processingIds.has(placement.sceneId) && (
                       <div className="console-card-processing">
                         <div className="console-spinner" />
                       </div>
@@ -1406,16 +1387,10 @@ export default function Console() {
       {/* Modal */}
       {modalPlacement && (
         <div className="console-modal" onClick={(e) => {
-          // Don't close modal during processing
-          if (modalPhase === 'selecting' || modalPhase === 'composing') return
           if (e.target === e.currentTarget) closeModal()
         }}>
           <div className="console-modal-content">
-            <button
-              className="console-modal-close"
-              onClick={closeModal}
-              disabled={modalPhase === 'selecting' || modalPhase === 'composing'}
-            >×</button>
+            <button className="console-modal-close" onClick={closeModal}>×</button>
             <div className="console-modal-body">
               <h2 className="console-modal-title">Placement Preview</h2>
 
@@ -1467,7 +1442,7 @@ export default function Console() {
                           <div className="console-progress-bar timed" style={{ animationDuration: '25s' }} />
                         </div>
                         <p className="console-progress-status">
-                          {modalPhase === 'selecting' ? 'Selecting best product...' : 'Composing into scene...'}
+                          {modalPhase === 'selecting' ? 'Selecting best product... ~5s' : 'Composing into scene... ~20s'}
                         </p>
                       </div>
                     </div>
@@ -1486,6 +1461,32 @@ export default function Console() {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmModal.open && (
+        <div className="console-confirm-overlay" onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))}>
+          <div className="console-confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>{confirmModal.title}</h3>
+            <p>{confirmModal.message}</p>
+            <div className="console-confirm-actions">
+              <button
+                type="button"
+                className="console-confirm-cancel"
+                onClick={() => setConfirmModal(prev => ({ ...prev, open: false }))}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="console-confirm-delete"
+                onClick={confirmModal.onConfirm}
+              >
+                Clear All
+              </button>
             </div>
           </div>
         </div>
