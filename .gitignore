@@ -36,3 +36,22 @@ node_modules/
 .idea/
 .vscode/
 *.swp
+
+# Office lock files
+.~lock.*
+
+# Claude Code annotations
+**/.annotations/
+
+# Test outputs
+**/test_outputs/
+
+# Claude generated files
+backend/claude_files/
+
+# Logs
+*.log
+
+# Build artifacts
+dist/
+build/
