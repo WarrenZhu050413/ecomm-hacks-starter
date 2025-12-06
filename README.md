@@ -87,7 +87,7 @@ The consumer can hover or click on an item of interest to see its listing, and c
 
 ### Challenges We Faced
 
-- **Visual interfaces within 24 hours**: Attention to detail within user interactions and aesthetics of pages were a definite priority
+- **Visual interfaces within 24 hours**: Attention to detail within user interactions and aesthetics of pages were a definite priority.
 - **Debugging coordinate mapping / race conditions**: CSS `object-fit: cover` crops images differently than the masks, requiring hover detection to consider offset.
 
 ### What's Next
