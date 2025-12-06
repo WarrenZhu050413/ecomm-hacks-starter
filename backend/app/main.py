@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import get_cors_origins, get_server_host, get_server_port
-from app.routers import chat, generate, image, images, media, onboard, style
+from app.routers import chat, generate, image, images, media, onboard, placement, style
 from app.services.gemini import GeminiService
 from app.services.logging_config import bind_context, clear_context, get_logger, setup_logging
 
@@ -137,6 +137,7 @@ app.include_router(onboard.router)
 app.include_router(generate.router)
 app.include_router(style.router)
 app.include_router(images.router)
+app.include_router(placement.router)
 
 
 @app.get("/")
