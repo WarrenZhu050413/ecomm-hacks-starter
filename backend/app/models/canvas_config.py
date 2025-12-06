@@ -2,11 +2,10 @@
 
 import json
 from pathlib import Path
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 from fastapi import HTTPException
 from pydantic import BaseModel, ConfigDict
-
 
 # === MODEL TYPES ===
 
@@ -38,7 +37,7 @@ class CardTheme(BaseModel):
     primary: str = "text-lg text-white leading-relaxed text-center"
     secondary: str = "text-base text-white/60 italic text-center mt-2"
     meta: str = "text-sm text-white/45 text-center mt-1"
-    dragging: Optional[str] = "opacity-80 scale-105 rotate-1"
+    dragging: str | None = "opacity-80 scale-105 rotate-1"
 
 
 class CanvasTheme(BaseModel):
@@ -48,10 +47,10 @@ class CanvasTheme(BaseModel):
     accent: str = "#fbbf24"
 
     # Image background with CSS filter post-processing (optional, overrides background if set)
-    backgroundImage: Optional[str] = None  # URL to background image (e.g., Wikimedia Commons)
-    backgroundFilter: Optional[str] = None  # CSS filter string (e.g., "blur(8px) brightness(0.3)")
-    backgroundBlendMode: Optional[str] = None  # CSS blend mode (e.g., "multiply", "overlay")
-    backgroundOverlay: Optional[str] = None  # CSS color overlay (e.g., "rgba(0,0,0,0.5)")
+    backgroundImage: str | None = None  # URL to background image (e.g., Wikimedia Commons)
+    backgroundFilter: str | None = None  # CSS filter string (e.g., "blur(8px) brightness(0.3)")
+    backgroundBlendMode: str | None = None  # CSS blend mode (e.g., "multiply", "overlay")
+    backgroundOverlay: str | None = None  # CSS color overlay (e.g., "rgba(0,0,0,0.5)")
 
 
 # === PHYSICS ===
@@ -93,13 +92,13 @@ class WritingPaneConfig(BaseModel):
     # Content
     title: str = "Ephemeral Space"
     placeholder: str = "Start writing..."
-    initialContent: Optional[str] = None  # Pre-populated template for new sessions
+    initialContent: str | None = None  # Pre-populated template for new sessions
 
     # Styling (CSS values)
-    background: Optional[str] = None  # CSS background (e.g., "rgba(0,0,0,0.5)", gradient)
-    textColor: Optional[str] = None  # Color of written text
-    titleColor: Optional[str] = None  # Color of the title
-    fontFamily: Optional[str] = None  # 'serif', 'sans', 'mono', or CSS font-family
+    background: str | None = None  # CSS background (e.g., "rgba(0,0,0,0.5)", gradient)
+    textColor: str | None = None  # Color of written text
+    titleColor: str | None = None  # Color of the title
+    fontFamily: str | None = None  # 'serif', 'sans', 'mono', or CSS font-family
 
 
 # === MAIN CONFIG ===
@@ -111,7 +110,7 @@ class CanvasConfig(BaseModel):
 
     # Identity
     name: str
-    hintText: Optional[str] = None
+    hintText: str | None = None
 
     # Card structure
     cardSchema: CardSchema
@@ -127,7 +126,7 @@ class CanvasConfig(BaseModel):
     directives: list[str]
 
     # Initial content (ideally 4 items)
-    seedContent: list[dict[str, Optional[str]]] = []
+    seedContent: list[dict[str, str | None]] = []
 
     # Physics
     physics: PhysicsConfig = PhysicsConfig()
@@ -208,7 +207,7 @@ def validate_card_or_raise(card_data: dict[str, Any], schema: CardSchema) -> Car
 
 # === DEFAULTS LOADER ===
 
-_defaults_cache: Optional[dict[str, Any]] = None
+_defaults_cache: dict[str, Any] | None = None
 
 
 def load_defaults() -> dict[str, Any]:

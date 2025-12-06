@@ -2,15 +2,13 @@
 
 from pydantic import BaseModel, model_validator
 
-from typing import Optional
-
 from .canvas_config import (
     CanvasConfig,
+    CanvasTheme,
     CardData,
     CardTheme,
-    CanvasTheme,
-    PhysicsConfig,
     CardValidationError,
+    PhysicsConfig,
     validate_card_against_schema,
 )
 
@@ -78,45 +76,45 @@ class StyleRequest(BaseModel):
     current_card_theme: CardTheme
     current_canvas_theme: CanvasTheme
     current_physics: PhysicsConfig
-    session_id: Optional[str] = None
+    session_id: str | None = None
 
 
 class PartialCardTheme(BaseModel):
     """Partial card theme for style updates."""
 
-    container: Optional[str] = None
-    primary: Optional[str] = None
-    secondary: Optional[str] = None
-    meta: Optional[str] = None
-    dragging: Optional[str] = None
+    container: str | None = None
+    primary: str | None = None
+    secondary: str | None = None
+    meta: str | None = None
+    dragging: str | None = None
 
 
 class PartialCanvasTheme(BaseModel):
     """Partial canvas theme for style updates."""
 
-    background: Optional[str] = None
-    accent: Optional[str] = None
-    backgroundImage: Optional[str] = None  # URL to background image
-    backgroundFilter: Optional[str] = None  # CSS filter string
-    backgroundBlendMode: Optional[str] = None  # CSS blend mode
-    backgroundOverlay: Optional[str] = None  # CSS color overlay
+    background: str | None = None
+    accent: str | None = None
+    backgroundImage: str | None = None  # URL to background image
+    backgroundFilter: str | None = None  # CSS filter string
+    backgroundBlendMode: str | None = None  # CSS blend mode
+    backgroundOverlay: str | None = None  # CSS color overlay
 
 
 class PartialPhysics(BaseModel):
     """Partial physics config for style updates."""
 
-    cardLifetime: Optional[int] = None
-    driftSpeed: Optional[float] = None
-    jiggle: Optional[float] = None
-    bounce: Optional[float] = None
+    cardLifetime: int | None = None
+    driftSpeed: float | None = None
+    jiggle: float | None = None
+    bounce: float | None = None
 
 
 class StyleResponse(BaseModel):
     """Response from style chat - either updates or a question."""
 
     type: str  # "update" or "question"
-    card_theme: Optional[PartialCardTheme] = None
-    canvas_theme: Optional[PartialCanvasTheme] = None
-    physics: Optional[PartialPhysics] = None
-    explanation: Optional[str] = None  # Explanation of changes or question
+    card_theme: PartialCardTheme | None = None
+    canvas_theme: PartialCanvasTheme | None = None
+    physics: PartialPhysics | None = None
+    explanation: str | None = None  # Explanation of changes or question
     session_id: str
