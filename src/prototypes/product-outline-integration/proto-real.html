@@ -88,13 +88,13 @@
             display: none;
         }
 
-        /* Hover highlight overlay */
+        /* Hover highlight overlay - transparent background, only shows product highlight */
         .hover-highlight {
             position: absolute;
             inset: 0;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.4s ease;
         }
 
         .hover-highlight.active {
@@ -104,28 +104,35 @@
         .hover-highlight canvas {
             width: 100%;
             height: 100%;
+            /* Add extra glow effect via CSS */
+            filter: drop-shadow(0 0 12px rgba(255,255,255,0.7))
+                    drop-shadow(0 0 25px rgba(255,255,255,0.4));
         }
 
-        /* Product card */
+        /* Product card - more translucent, positioned to the right */
         .product-card {
             position: absolute;
-            width: 280px;
-            background: rgba(250,248,243,0.97);
-            backdrop-filter: blur(16px);
+            width: 260px;
+            background: rgba(250,248,243,0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.3);
             border-radius: 14px;
             overflow: hidden;
             opacity: 0;
             visibility: hidden;
-            transform: translateY(10px) scale(0.95);
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 16px 48px rgba(74,74,72,0.2);
+            transform: translateX(-10px) scale(0.95);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 12px 40px rgba(74,74,72,0.15);
             z-index: 100;
+            pointer-events: none;
         }
 
         .product-card.active {
             opacity: 1;
             visibility: visible;
-            transform: translateY(0) scale(1);
+            transform: translateX(0) scale(1);
+            pointer-events: auto;
         }
 
         .card-image {
@@ -341,55 +348,62 @@
             return brightness > 128;
         }
 
-        // Draw highlight based on mask
+        // Draw highlight based on mask - ONLY on product area, rest is transparent
         function drawHighlight() {
             if (!highlightCtx || !maskImageData) return;
 
             highlightCtx.clearRect(0, 0, highlightCanvas.width, highlightCanvas.height);
 
-            // Draw translucent white where mask is white
+            // Create image data - everything starts fully transparent
             const imgData = highlightCtx.createImageData(highlightCanvas.width, highlightCanvas.height);
 
+            // Only draw white highlight where mask is white (product area)
+            // Everything else stays transparent (alpha = 0)
             for (let i = 0; i < maskImageData.data.length; i += 4) {
                 const brightness = (maskImageData.data[i] + maskImageData.data[i+1] + maskImageData.data[i+2]) / 3;
                 if (brightness > 128) {
+                    // Product area - more pronounced white highlight
                     imgData.data[i] = 255;     // R
                     imgData.data[i+1] = 255;   // G
                     imgData.data[i+2] = 255;   // B
-                    imgData.data[i+3] = 60;    // A (translucent)
+                    imgData.data[i+3] = 100;   // A - more visible (was 60)
                 }
+                // else: leave as 0,0,0,0 (fully transparent) - no darkening!
             }
 
             highlightCtx.putImageData(imgData, 0, 0);
 
-            // Add glow border effect
+            // Add a glowing outline effect around the product
+            // We'll draw a slightly expanded version with blur
             highlightCtx.globalCompositeOperation = 'source-over';
-            highlightCtx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-            highlightCtx.lineWidth = 4;
-            highlightCtx.shadowColor = 'rgba(255, 255, 255, 0.8)';
-            highlightCtx.shadowBlur = 20;
-
-            // Draw outline by tracing the mask edge (simplified - just draw the image with effects)
-            highlightCtx.globalAlpha = 0.5;
+            highlightCtx.filter = 'blur(8px)';
+            highlightCtx.drawImage(highlightCanvas, 0, 0);
+            highlightCtx.filter = 'none';
         }
 
-        // Position the product card near the cursor
+        // Position the product card to the RIGHT of cursor, vertically centered
         function positionCard(x, y) {
             const rect = sceneContainer.getBoundingClientRect();
-            const cardWidth = 280;
-            const cardHeight = 350;
+            const cardWidth = 260;
+            const cardHeight = 320; // approximate height
 
-            let left = x - rect.left + 20;
-            let top = y - rect.top - 50;
+            // Position to the RIGHT of cursor with gap
+            const gap = 30;
+            let left = x - rect.left + gap;
 
-            // Keep card in bounds
+            // Vertically centered with cursor
+            let top = y - rect.top - (cardHeight / 2);
+
+            // If card would go off right edge, flip to left of cursor
             if (left + cardWidth > rect.width) {
-                left = x - rect.left - cardWidth - 20;
+                left = x - rect.left - cardWidth - gap;
             }
-            if (top + cardHeight > rect.height) {
-                top = rect.height - cardHeight - 20;
+
+            // Keep vertically in bounds
+            if (top < 10) top = 10;
+            if (top + cardHeight > rect.height - 10) {
+                top = rect.height - cardHeight - 10;
             }
-            if (top < 0) top = 20;
 
             productCard.style.left = left + 'px';
             productCard.style.top = top + 'px';

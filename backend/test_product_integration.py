@@ -102,20 +102,19 @@ Output the edited cafe scene with the handbag placed in it."""
         print("ERROR: No integrated image generated!")
         return
 
-    # Step 2: Generate mask for the handbag
-    print("\n--- Step 2: Generate mask for hover detection ---")
+    # Step 2: Generate mask for the handbag - use RED for product, grayscale for rest
+    print("\n--- Step 2: Generate mask with RED product marker ---")
 
     mask_prompt = """Look at this cafe scene image. There is a brown leather HANDBAG placed on one of the tables.
 
-YOUR TASK: Generate a BLACK AND WHITE MASK image where:
-- The HANDBAG area is pure WHITE (#FFFFFF)
-- EVERYTHING ELSE (tables, chairs, background, floor, etc.) is pure BLACK (#000000)
+YOUR TASK: Create a SEGMENTATION image where:
+- Paint the HANDBAG area in PURE BRIGHT RED (#FF0000)
+- Convert EVERYTHING ELSE to GRAYSCALE (black and white)
 
-This mask will be used for mouse hover detection on a website.
-The mask should be the same dimensions as the input image.
-Only the handbag should be white, nothing else."""
+The handbag should be solid bright red, clearly visible against the grayscale background.
+This will be used to identify the handbag location for a website feature."""
 
-    print("Generating mask...")
+    print("Generating red-marked mask...")
     mask_response = await client.aio.models.generate_content(
         model="gemini-2.5-flash-image",
         contents=[
@@ -130,18 +129,51 @@ Only the handbag should be white, nothing else."""
         config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"]),
     )
 
+    raw_mask_bytes = None
     if mask_response.candidates and mask_response.candidates[0].content:
         for part in mask_response.candidates[0].content.parts:
             if hasattr(part, 'text') and part.text:
                 print(f"Mask response: {part.text[:200]}...")
             if hasattr(part, 'inline_data') and part.inline_data and part.inline_data.data:
-                mask_bytes = part.inline_data.data
-                mime = part.inline_data.mime_type
-                ext = "png" if "png" in mime else "jpg"
-                path = output_dir / f"mask.{ext}"
+                raw_mask_bytes = part.inline_data.data
+                path = output_dir / "mask_raw.png"
                 with open(path, "wb") as f:
-                    f.write(mask_bytes)
-                print(f"Saved mask: {path} ({len(mask_bytes)} bytes)")
+                    f.write(raw_mask_bytes)
+                print(f"Saved raw mask: {path} ({len(raw_mask_bytes)} bytes)")
+
+    # Step 3: Post-process to extract red channel as pure mask
+    if raw_mask_bytes:
+        print("\n--- Step 3: Post-processing mask (extract red channel) ---")
+        from PIL import Image
+        import io
+
+        # Load the raw mask
+        raw_img = Image.open(io.BytesIO(raw_mask_bytes)).convert('RGB')
+        width, height = raw_img.size
+        print(f"Raw mask size: {width}x{height}")
+
+        # Create new mask - white where red is dominant, black elsewhere
+        pixels = raw_img.load()
+        mask_img = Image.new('RGB', (width, height), (0, 0, 0))
+        mask_pixels = mask_img.load()
+
+        red_pixel_count = 0
+        for y in range(height):
+            for x in range(width):
+                r, g, b = pixels[x, y]
+                # Check if pixel is "red" - red channel high, others low
+                # Be generous: red > 150 and red > green+50 and red > blue+50
+                if r > 150 and r > g + 30 and r > b + 30:
+                    mask_pixels[x, y] = (255, 255, 255)  # White
+                    red_pixel_count += 1
+                # else stays black
+
+        print(f"Found {red_pixel_count} red pixels ({100*red_pixel_count/(width*height):.1f}% of image)")
+
+        # Save the processed mask
+        mask_path = output_dir / "mask.png"
+        mask_img.save(mask_path)
+        print(f"Saved processed mask: {mask_path}")
 
     print("\n--- Done! Check test_output/ folder ---")
 
