@@ -1,7 +1,6 @@
 """Gemini API service using google-genai SDK."""
 
 import base64
-import logging
 import os
 import time
 from dataclasses import dataclass, field
@@ -10,14 +9,9 @@ from typing import Any
 from google import genai
 from google.genai import types
 
-logger = logging.getLogger(__name__)
+from app.services.logging_config import get_logger
 
-
-def _truncate(s: str, max_len: int = 200) -> str:
-    """Truncate string for logging."""
-    if len(s) <= max_len:
-        return s
-    return s[:max_len] + f"... ({len(s)} chars total)"
+logger = get_logger(__name__)
 
 
 def _detect_image_mime_type(data: bytes) -> str:
@@ -106,9 +100,9 @@ class GeminiService:
         model_name = model or self.default_model
         start_time = time.time()
 
-        logger.info(f"[Gemini.query] model={model_name} prompt={_truncate(prompt)}")
+        logger.info("gemini_query_started", model=model_name, prompt_length=len(prompt))
         if system_instruction:
-            logger.debug(f"[Gemini.query] system_instruction={_truncate(system_instruction)}")
+            logger.debug("gemini_query_system_instruction", instruction_length=len(system_instruction))
 
         config = {}
         if system_instruction:
@@ -122,7 +116,13 @@ class GeminiService:
             )
         except Exception as e:
             elapsed = time.time() - start_time
-            logger.error(f"[Gemini.query] FAILED model={model_name} elapsed={elapsed:.2f}s error={type(e).__name__}: {e}")
+            logger.error(
+                "gemini_query_failed",
+                model=model_name,
+                elapsed_seconds=round(elapsed, 3),
+                error_type=type(e).__name__,
+                error=str(e),
+            )
             raise
 
         elapsed = time.time() - start_time
@@ -136,7 +136,13 @@ class GeminiService:
                 "total_tokens": getattr(response.usage_metadata, "total_token_count", None),
             }
 
-        logger.info(f"[Gemini.query] SUCCESS model={model_name} elapsed={elapsed:.2f}s usage={usage} response={_truncate(response.text)}")
+        logger.info(
+            "gemini_query_completed",
+            model=model_name,
+            elapsed_seconds=round(elapsed, 3),
+            usage=usage,
+            response_length=len(response.text) if response.text else 0,
+        )
 
         return GeminiResult(
             text=response.text,
@@ -163,10 +169,7 @@ class GeminiService:
         model_name = model or self.default_model
         start_time = time.time()
 
-        logger.info(f"[Gemini.chat] model={model_name} messages={len(messages)}")
-        if messages:
-            last_msg = messages[-1].get("content", "")
-            logger.debug(f"[Gemini.chat] last_message={_truncate(last_msg)}")
+        logger.info("gemini_chat_started", model=model_name, message_count=len(messages))
 
         # Convert messages to Gemini format using types.Content
         contents = []
@@ -195,7 +198,13 @@ class GeminiService:
             )
         except Exception as e:
             elapsed = time.time() - start_time
-            logger.error(f"[Gemini.chat] FAILED model={model_name} elapsed={elapsed:.2f}s error={type(e).__name__}: {e}")
+            logger.error(
+                "gemini_chat_failed",
+                model=model_name,
+                elapsed_seconds=round(elapsed, 3),
+                error_type=type(e).__name__,
+                error=str(e),
+            )
             raise
 
         elapsed = time.time() - start_time
@@ -208,7 +217,13 @@ class GeminiService:
                 "total_tokens": getattr(response.usage_metadata, "total_token_count", None),
             }
 
-        logger.info(f"[Gemini.chat] SUCCESS model={model_name} elapsed={elapsed:.2f}s usage={usage} response={_truncate(response.text)}")
+        logger.info(
+            "gemini_chat_completed",
+            model=model_name,
+            elapsed_seconds=round(elapsed, 3),
+            usage=usage,
+            response_length=len(response.text) if response.text else 0,
+        )
 
         return GeminiResult(
             text=response.text,
@@ -234,7 +249,7 @@ class GeminiService:
         model_name = self.DEFAULT_IMAGE_MODEL
         start_time = time.time()
 
-        logger.info(f"[Gemini.generate_image] model={model_name} prompt={_truncate(prompt)}")
+        logger.info("gemini_image_generation_started", model=model_name, prompt_length=len(prompt))
 
         # Build config with image generation enabled
         config = types.GenerateContentConfig(
@@ -249,7 +264,13 @@ class GeminiService:
             )
         except Exception as e:
             elapsed = time.time() - start_time
-            logger.error(f"[Gemini.generate_image] FAILED model={model_name} elapsed={elapsed:.2f}s error={type(e).__name__}: {e}")
+            logger.error(
+                "gemini_image_generation_failed",
+                model=model_name,
+                elapsed_seconds=round(elapsed, 3),
+                error_type=type(e).__name__,
+                error=str(e),
+            )
             raise
 
         elapsed = time.time() - start_time
@@ -286,9 +307,13 @@ class GeminiService:
                 "total_tokens": getattr(response.usage_metadata, "total_token_count", None),
             }
 
-        logger.info(f"[Gemini.generate_image] SUCCESS model={model_name} elapsed={elapsed:.2f}s images={len(images)} usage={usage}")
-        if text:
-            logger.debug(f"[Gemini.generate_image] text_response={_truncate(text)}")
+        logger.info(
+            "gemini_image_generation_completed",
+            model=model_name,
+            elapsed_seconds=round(elapsed, 3),
+            image_count=len(images),
+            usage=usage,
+        )
 
         return ImageResult(
             text=text,
@@ -318,7 +343,13 @@ class GeminiService:
         model_name = self.DEFAULT_IMAGE_MODEL
         start_time = time.time()
 
-        logger.info(f"[Gemini.edit_image] model={model_name} prompt={_truncate(prompt)} image_size={len(image_data)} mime={image_mime_type}")
+        logger.info(
+            "gemini_image_edit_started",
+            model=model_name,
+            prompt_length=len(prompt),
+            image_size_bytes=len(image_data),
+            image_mime_type=image_mime_type,
+        )
 
         # Build content with both text and image
         contents = [
@@ -343,7 +374,13 @@ class GeminiService:
             )
         except Exception as e:
             elapsed = time.time() - start_time
-            logger.error(f"[Gemini.edit_image] FAILED model={model_name} elapsed={elapsed:.2f}s error={type(e).__name__}: {e}")
+            logger.error(
+                "gemini_image_edit_failed",
+                model=model_name,
+                elapsed_seconds=round(elapsed, 3),
+                error_type=type(e).__name__,
+                error=str(e),
+            )
             raise
 
         elapsed = time.time() - start_time
@@ -377,7 +414,13 @@ class GeminiService:
                 "total_tokens": getattr(response.usage_metadata, "total_token_count", None),
             }
 
-        logger.info(f"[Gemini.edit_image] SUCCESS model={model_name} elapsed={elapsed:.2f}s images={len(images)} usage={usage}")
+        logger.info(
+            "gemini_image_edit_completed",
+            model=model_name,
+            elapsed_seconds=round(elapsed, 3),
+            image_count=len(images),
+            usage=usage,
+        )
 
         return ImageResult(
             text=text,
@@ -417,7 +460,13 @@ class GeminiService:
             model_name = self.default_model
 
         file_count = len(files) if files else 0
-        logger.info(f"[Gemini.multimedia_query] model={model_name} prompt={_truncate(prompt)} files={file_count} modalities={response_modalities}")
+        logger.info(
+            "gemini_multimedia_query_started",
+            model=model_name,
+            prompt_length=len(prompt),
+            file_count=file_count,
+            response_modalities=response_modalities,
+        )
 
         # Build parts list: text prompt first, then files
         parts = [types.Part.from_text(text=prompt)]
@@ -449,7 +498,13 @@ class GeminiService:
             )
         except Exception as e:
             elapsed = time.time() - start_time
-            logger.error(f"[Gemini.multimedia_query] FAILED model={model_name} elapsed={elapsed:.2f}s error={type(e).__name__}: {e}")
+            logger.error(
+                "gemini_multimedia_query_failed",
+                model=model_name,
+                elapsed_seconds=round(elapsed, 3),
+                error_type=type(e).__name__,
+                error=str(e),
+            )
             raise
 
         elapsed = time.time() - start_time
@@ -483,9 +538,14 @@ class GeminiService:
                 "total_tokens": getattr(response.usage_metadata, "total_token_count", None),
             }
 
-        logger.info(f"[Gemini.multimedia_query] SUCCESS model={model_name} elapsed={elapsed:.2f}s images={len(images)} usage={usage}")
-        if text:
-            logger.debug(f"[Gemini.multimedia_query] text_response={_truncate(text)}")
+        logger.info(
+            "gemini_multimedia_query_completed",
+            model=model_name,
+            elapsed_seconds=round(elapsed, 3),
+            image_count=len(images),
+            response_length=len(text) if text else 0,
+            usage=usage,
+        )
 
         return MediaResult(
             text=text,
@@ -513,7 +573,7 @@ class GeminiService:
         model_name = model or self.default_model
         start_time = time.time()
 
-        logger.info(f"[Gemini.query_sync] model={model_name} prompt={_truncate(prompt)}")
+        logger.info("gemini_query_sync_started", model=model_name, prompt_length=len(prompt))
 
         config = {}
         if system_instruction:
@@ -527,7 +587,13 @@ class GeminiService:
             )
         except Exception as e:
             elapsed = time.time() - start_time
-            logger.error(f"[Gemini.query_sync] FAILED model={model_name} elapsed={elapsed:.2f}s error={type(e).__name__}: {e}")
+            logger.error(
+                "gemini_query_sync_failed",
+                model=model_name,
+                elapsed_seconds=round(elapsed, 3),
+                error_type=type(e).__name__,
+                error=str(e),
+            )
             raise
 
         elapsed = time.time() - start_time
@@ -540,7 +606,13 @@ class GeminiService:
                 "total_tokens": getattr(response.usage_metadata, "total_token_count", None),
             }
 
-        logger.info(f"[Gemini.query_sync] SUCCESS model={model_name} elapsed={elapsed:.2f}s usage={usage} response={_truncate(response.text)}")
+        logger.info(
+            "gemini_query_sync_completed",
+            model=model_name,
+            elapsed_seconds=round(elapsed, 3),
+            usage=usage,
+            response_length=len(response.text) if response.text else 0,
+        )
 
         return GeminiResult(
             text=response.text,

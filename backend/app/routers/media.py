@@ -1,6 +1,6 @@
 """Multi-media router for Gemini API endpoints."""
 
-import logging
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -11,8 +11,9 @@ from app.models.media import (
     MediaQueryResponse,
 )
 from app.services.gemini import GeminiService
+from app.services.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/media", tags=["media"])
 
@@ -37,6 +38,16 @@ async def multimedia_query(
 
     For image generation, include response_modalities: ["TEXT", "IMAGE"].
     """
+    start_time = time.time()
+    file_count = len(request.files) if request.files else 0
+    logger.info(
+        "media_query_started",
+        model=request.model,
+        prompt_length=len(request.prompt),
+        file_count=file_count,
+        response_modalities=request.response_modalities,
+    )
+
     try:
         # Convert files to format expected by service
         files = None
@@ -51,6 +62,15 @@ async def multimedia_query(
             system_instruction=request.system_prompt,
         )
 
+        elapsed = time.time() - start_time
+        logger.info(
+            "media_query_completed",
+            model=result.model,
+            elapsed_seconds=round(elapsed, 3),
+            image_count=len(result.images),
+            usage=result.usage,
+        )
+
         return MediaQueryResponse(
             text=result.text,
             images=[GeneratedMedia(data=img["data"], mime_type=img["mime_type"]) for img in result.images],
@@ -59,7 +79,14 @@ async def multimedia_query(
         )
 
     except Exception as e:
-        logger.error(f"Multi-media query error: {e}", exc_info=True)
+        elapsed = time.time() - start_time
+        logger.error(
+            "media_query_failed",
+            model=request.model,
+            elapsed_seconds=round(elapsed, 3),
+            error_type=type(e).__name__,
+            error=str(e),
+        )
         raise HTTPException(status_code=503, detail=f"Multi-media query error: {str(e)}")
 
 

@@ -1,6 +1,6 @@
 """Style router - Chat-based visual style modifications."""
 
-import logging
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -12,8 +12,9 @@ from app.models.ephemeral import StyleRequest, StyleResponse
 from app.services.prompt_loader import format_history, load_and_fill_prompt
 from app.services.session_store import session_store
 from app.services.xml_parser import parse_style_response
+from app.services.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api", tags=["ephemeral"])
 
@@ -45,6 +46,13 @@ async def style_chat(
     Takes current theme/physics + user message, returns partial updates.
     Model is determined by defaults.models.chat.
     """
+    start_time = time.time()
+    logger.info(
+        "style_chat_started",
+        session_id=request_data.session_id[:8] + "..." if request_data.session_id else None,
+        message_length=len(request_data.message),
+    )
+
     try:
         # Get or create session for conversation continuity
         session_id, history = await session_store.get_or_create(
@@ -83,6 +91,15 @@ async def style_chat(
         explanation = parsed.get("explanation", "")
         await session_store.add_message(session_id, "assistant", explanation)
 
+        elapsed = time.time() - start_time
+        logger.info(
+            "style_chat_completed",
+            session_id=session_id[:8] + "...",
+            elapsed_seconds=round(elapsed, 3),
+            result_type=parsed["type"],
+            model=gemini_model,
+        )
+
         # Build response
         return StyleResponse(
             type=parsed["type"],
@@ -96,5 +113,11 @@ async def style_chat(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Style chat error: {type(e).__name__}: {str(e)}", exc_info=True)
+        elapsed = time.time() - start_time
+        logger.error(
+            "style_chat_failed",
+            elapsed_seconds=round(elapsed, 3),
+            error_type=type(e).__name__,
+            error=str(e),
+        )
         raise HTTPException(status_code=503, detail=f"Style chat error: {str(e)}")

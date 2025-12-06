@@ -1,10 +1,15 @@
 """Image search router - Wikimedia Commons integration."""
 
 import re
+import time
 
 import httpx
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
+
+from app.services.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/images", tags=["images"])
 
@@ -38,6 +43,9 @@ async def search_images(
 
     Returns image URLs, thumbnails, and metadata for the given query.
     """
+    start_time = time.time()
+    logger.info("wikimedia_search_started", query=query, limit=limit)
+
     # Build Wikimedia API request
     params = {
         "action": "query",
@@ -63,8 +71,24 @@ async def search_images(
             response.raise_for_status()
             data = response.json()
         except httpx.HTTPError as e:
+            elapsed = time.time() - start_time
+            logger.error(
+                "wikimedia_search_failed",
+                query=query,
+                elapsed_seconds=round(elapsed, 3),
+                error_type="HTTPError",
+                error=str(e),
+            )
             raise HTTPException(status_code=502, detail=f"Wikimedia API error: {e}")
         except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(
+                "wikimedia_search_failed",
+                query=query,
+                elapsed_seconds=round(elapsed, 3),
+                error_type=type(e).__name__,
+                error=str(e),
+            )
             raise HTTPException(status_code=500, detail=f"Failed to fetch images: {e}")
 
     # Parse results
@@ -102,6 +126,14 @@ async def search_images(
             )
         )
 
+    elapsed = time.time() - start_time
+    logger.info(
+        "wikimedia_search_completed",
+        query=query,
+        result_count=len(results),
+        elapsed_seconds=round(elapsed, 3),
+    )
+
     return ImageSearchResponse(results=results, query=query)
 
 
@@ -118,6 +150,9 @@ async def get_random_images(
 
     Useful for inspiration or when no specific query is provided.
     """
+    start_time = time.time()
+    logger.info("wikimedia_random_started", category=category, limit=limit)
+
     params = {
         "action": "query",
         "generator": "categorymembers",
@@ -143,8 +178,24 @@ async def get_random_images(
             response.raise_for_status()
             data = response.json()
         except httpx.HTTPError as e:
+            elapsed = time.time() - start_time
+            logger.error(
+                "wikimedia_random_failed",
+                category=category,
+                elapsed_seconds=round(elapsed, 3),
+                error_type="HTTPError",
+                error=str(e),
+            )
             raise HTTPException(status_code=502, detail=f"Wikimedia API error: {e}")
         except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(
+                "wikimedia_random_failed",
+                category=category,
+                elapsed_seconds=round(elapsed, 3),
+                error_type=type(e).__name__,
+                error=str(e),
+            )
             raise HTTPException(status_code=500, detail=f"Failed to fetch images: {e}")
 
     # Parse results (same as search)
@@ -176,5 +227,13 @@ async def get_random_images(
                 attribution=artist or None,
             )
         )
+
+    elapsed = time.time() - start_time
+    logger.info(
+        "wikimedia_random_completed",
+        category=category,
+        result_count=len(results),
+        elapsed_seconds=round(elapsed, 3),
+    )
 
     return ImageSearchResponse(results=results, query=category)

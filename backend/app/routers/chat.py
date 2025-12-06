@@ -1,6 +1,6 @@
 """Chat router for Gemini API endpoints."""
 
-import logging
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -13,8 +13,9 @@ from app.models.chat import (
     SimpleQueryResponse,
 )
 from app.services.gemini import GeminiService
+from app.services.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
@@ -37,6 +38,13 @@ async def chat_completions(
     Send a list of messages and receive an assistant response.
     Messages should alternate between user and assistant roles.
     """
+    start_time = time.time()
+    logger.info(
+        "chat_completion_started",
+        model=request.model,
+        message_count=len(request.messages),
+    )
+
     try:
         # Convert messages to the format expected by Gemini
         messages = [
@@ -49,6 +57,14 @@ async def chat_completions(
             system_instruction=request.system_prompt,
         )
 
+        elapsed = time.time() - start_time
+        logger.info(
+            "chat_completion_completed",
+            model=result.model,
+            elapsed_seconds=round(elapsed, 3),
+            usage=result.usage,
+        )
+
         return ChatResponse(
             message=Message(role="assistant", content=result.text),
             model=result.model,
@@ -56,7 +72,14 @@ async def chat_completions(
         )
 
     except Exception as e:
-        logger.error(f"Chat completion error: {e}", exc_info=True)
+        elapsed = time.time() - start_time
+        logger.error(
+            "chat_completion_failed",
+            model=request.model,
+            elapsed_seconds=round(elapsed, 3),
+            error_type=type(e).__name__,
+            error=str(e),
+        )
         raise HTTPException(status_code=503, detail=f"Chat completion error: {str(e)}")
 
 
@@ -70,11 +93,26 @@ async def simple_query(
     Send a single prompt and receive a response.
     For conversations with history, use /completions instead.
     """
+    start_time = time.time()
+    logger.info(
+        "simple_query_started",
+        model=request.model,
+        prompt_length=len(request.prompt),
+    )
+
     try:
         result = await gemini.query(
             prompt=request.prompt,
             model=request.model,
             system_instruction=request.system_prompt,
+        )
+
+        elapsed = time.time() - start_time
+        logger.info(
+            "simple_query_completed",
+            model=result.model,
+            elapsed_seconds=round(elapsed, 3),
+            usage=result.usage,
         )
 
         return SimpleQueryResponse(
@@ -84,7 +122,14 @@ async def simple_query(
         )
 
     except Exception as e:
-        logger.error(f"Query error: {e}", exc_info=True)
+        elapsed = time.time() - start_time
+        logger.error(
+            "simple_query_failed",
+            model=request.model,
+            elapsed_seconds=round(elapsed, 3),
+            error_type=type(e).__name__,
+            error=str(e),
+        )
         raise HTTPException(status_code=503, detail=f"Query error: {str(e)}")
 
 

@@ -1,8 +1,8 @@
 """Main FastAPI application for Gemini backend."""
 
-import logging
 import os
 import time
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -14,74 +14,98 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app.config import get_cors_origins, get_server_host, get_server_port
 from app.routers import chat, generate, image, images, media, onboard, style
 from app.services.gemini import GeminiService
+from app.services.logging_config import bind_context, clear_context, get_logger, setup_logging
 
 # Load environment variables
 env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(env_path)
 
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger(__name__)
+# Initialize structured logging
+setup_logging()
+logger = get_logger(__name__)
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
-    """Middleware to log all HTTP requests and responses."""
+    """Middleware to log all HTTP requests and responses with request tracing."""
 
     async def dispatch(self, request: Request, call_next):
+        # Generate unique request ID for tracing
+        request_id = str(uuid.uuid4())[:8]
         start_time = time.time()
+
         method = request.method
         path = request.url.path
-        query = str(request.query_params) if request.query_params else ""
+        query_params = dict(request.query_params) if request.query_params else None
 
-        # Log request
-        logger.info(f"[HTTP] --> {method} {path}{f'?{query}' if query else ''}")
+        # Bind request context for all subsequent logs
+        bind_context(request_id=request_id)
+
+        # Log incoming request
+        logger.info(
+            "http_request_started",
+            method=method,
+            path=path,
+            query_params=query_params,
+        )
 
         try:
             response = await call_next(request)
             elapsed = time.time() - start_time
-
-            # Log response with appropriate level based on status code
             status = response.status_code
-            level = logging.INFO if status < 400 else logging.WARNING if status < 500 else logging.ERROR
-            logger.log(level, f"[HTTP] <-- {method} {path} {status} ({elapsed:.2f}s)")
+
+            # Log response with appropriate level
+            log_method = logger.info if status < 400 else logger.warning if status < 500 else logger.error
+            log_method(
+                "http_request_completed",
+                method=method,
+                path=path,
+                status_code=status,
+                elapsed_seconds=round(elapsed, 3),
+            )
 
             return response
         except Exception as e:
             elapsed = time.time() - start_time
-            logger.error(f"[HTTP] <-- {method} {path} ERROR ({elapsed:.2f}s): {type(e).__name__}: {e}")
+            logger.exception(
+                "http_request_failed",
+                method=method,
+                path=path,
+                elapsed_seconds=round(elapsed, 3),
+                error_type=type(e).__name__,
+                error=str(e),
+            )
             raise
+        finally:
+            # Clear request context to prevent leaking
+            clear_context()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifespan - startup and shutdown."""
-    logger.info("Starting Gemini backend...")
+    logger.info("server_starting")
 
     # Initialize Gemini service
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        logger.warning("GEMINI_API_KEY not set - API calls will fail")
+        logger.warning("gemini_api_key_missing", message="GEMINI_API_KEY not set - API calls will fail")
 
     default_model = os.environ.get("GEMINI_MODEL", "gemini-3-pro-preview")
 
     try:
         app.state.gemini_service = GeminiService(api_key=api_key, default_model=default_model)
-        logger.info(f"Gemini service initialized with model: {default_model}")
+        logger.info("gemini_service_initialized", model=default_model)
     except ValueError as e:
-        logger.error(f"Failed to initialize Gemini service: {e}")
-        # Create a placeholder service that will error on use
+        logger.error("gemini_service_failed", error=str(e))
         app.state.gemini_service = None
 
     host = get_server_host()
     port = get_server_port()
-    logger.info(f"Gemini backend ready at http://{host}:{port}")
+    logger.info("server_ready", host=host, port=port, url=f"http://{host}:{port}")
 
     yield
 
-    logger.info("Shutting down Gemini backend...")
+    logger.info("server_shutting_down")
 
 
 app = FastAPI(

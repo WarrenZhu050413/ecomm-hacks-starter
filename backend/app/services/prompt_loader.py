@@ -3,6 +3,10 @@
 from pathlib import Path
 from typing import Any
 
+from app.services.logging_config import get_logger
+
+logger = get_logger(__name__)
+
 # Cache loaded prompts
 _prompt_cache: dict[str, str] = {}
 
@@ -17,18 +21,21 @@ def load_prompt(name: str) -> str:
         The prompt template text
     """
     if name in _prompt_cache:
+        logger.debug("prompt_cache_hit", name=name)
         return _prompt_cache[name]
 
     prompts_dir = Path(__file__).parent.parent.parent / "prompts"
     prompt_path = prompts_dir / f"{name}.md"
 
     if not prompt_path.exists():
+        logger.error("prompt_not_found", name=name, path=str(prompt_path))
         raise FileNotFoundError(f"Prompt template not found: {prompt_path}")
 
     with open(prompt_path) as f:
         template = f.read()
 
     _prompt_cache[name] = template
+    logger.debug("prompt_loaded", name=name, length=len(template))
     return template
 
 

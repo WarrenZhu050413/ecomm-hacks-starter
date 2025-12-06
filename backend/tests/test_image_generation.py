@@ -7,11 +7,13 @@ Tests the image generation flow to ensure:
 """
 
 import base64
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
-from app.routers.generate import _generate_image_card, IMAGE_GENERATION_PROMPT
+import pytest
+
+from app.routers.generate import _generate_image_card
 from app.services.gemini import GeminiService, ImageResult
+from app.services.prompt_loader import load_prompt
 
 
 @pytest.fixture
@@ -217,12 +219,14 @@ class TestPromptTemplate:
 
     def test_prompt_template_has_placeholders(self):
         """Verify prompt template has required placeholders."""
-        assert "{user_context}" in IMAGE_GENERATION_PROMPT
-        assert "{config_name}" in IMAGE_GENERATION_PROMPT
+        prompt = load_prompt("image_generation")
+        assert "{user_context}" in prompt
+        assert "{config_name}" in prompt
 
     def test_prompt_requests_artistic_style(self):
         """Verify prompt asks for artistic (not stock photo) images."""
-        prompt_lower = IMAGE_GENERATION_PROMPT.lower()
+        prompt = load_prompt("image_generation")
+        prompt_lower = prompt.lower()
         assert "artistic" in prompt_lower or "creative" in prompt_lower
         assert "stock" in prompt_lower  # Should mention "not stock photo style"
 
@@ -243,6 +247,7 @@ class TestRealImageGeneration:
     async def test_real_image_generation(self):
         """Test actual image generation with real API."""
         import os
+
         from app.services.gemini import GeminiService
 
         service = GeminiService(api_key=os.environ["GEMINI_API_KEY"])

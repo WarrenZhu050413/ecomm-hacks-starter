@@ -5,6 +5,10 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
+from app.services.logging_config import get_logger
+
+logger = get_logger(__name__)
+
 
 @dataclass
 class ConversationSession:
@@ -41,10 +45,20 @@ class SessionStore:
             if session_id and session_id in self._sessions:
                 session = self._sessions[session_id]
                 session.last_accessed = datetime.now()
+                logger.debug(
+                    "session_accessed",
+                    session_id=session_id[:8] + "...",
+                    message_count=len(session.messages),
+                )
                 return session_id, session.messages.copy()
 
             new_id = str(uuid.uuid4())
             self._sessions[new_id] = ConversationSession()
+            logger.info(
+                "session_created",
+                session_id=new_id[:8] + "...",
+                total_sessions=len(self._sessions),
+            )
             return new_id, []
 
     async def add_message(self, session_id: str, role: str, content: str) -> None:
@@ -77,6 +91,14 @@ class SessionStore:
             ]
             for sid in expired:
                 del self._sessions[sid]
+
+            if expired:
+                logger.info(
+                    "sessions_expired",
+                    expired_count=len(expired),
+                    remaining_count=len(self._sessions),
+                )
+
             return len(expired)
 
     async def get_session_count(self) -> int:

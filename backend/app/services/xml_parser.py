@@ -3,6 +3,10 @@
 import json
 from typing import Any
 
+from app.services.logging_config import get_logger
+
+logger = get_logger(__name__)
+
 
 class XmlParseError(Exception):
     """Base exception for XML parsing errors."""
@@ -107,17 +111,28 @@ def parse_onboard_response(response: str) -> dict[str, Any]:
         ValueError: If neither tag is found or JSON is invalid
         XmlParseError: If XML parsing fails
     """
+    logger.debug("xml_parse_onboard_started", response_length=len(response))
+
     # Check for question first (more common in conversation)
     if "<question>" in response:
         content = parse_xml_content(response, "question")
+        logger.debug("xml_parse_onboard_completed", result_type="question")
         return {"type": "question", "content": content}
     elif "<canvas_config>" in response:
         config_json = parse_xml_content(response, "canvas_config")
         try:
-            return {"type": "config", "content": json.loads(config_json)}
+            result = {"type": "config", "content": json.loads(config_json)}
+            logger.debug("xml_parse_onboard_completed", result_type="config")
+            return result
         except json.JSONDecodeError as e:
+            logger.warning(
+                "xml_parse_onboard_json_error",
+                tag="canvas_config",
+                error=str(e),
+            )
             raise ValueError(f"Invalid JSON in <canvas_config>: {e}")
 
+    logger.warning("xml_parse_onboard_no_tag", response_length=len(response))
     preview = response[:200] + "..." if len(response) > 200 else response
     raise ValueError(f"Response must contain <question> or <canvas_config>. Response preview: {preview}")
 
@@ -135,10 +150,19 @@ def parse_card_response(response: str) -> dict[str, Any]:
         XmlParseError: If XML parsing fails
         ValueError: If JSON parsing fails
     """
+    logger.debug("xml_parse_card_started", response_length=len(response))
     card_json = parse_xml_content(response, "card")
     try:
-        return json.loads(card_json)
+        result = json.loads(card_json)
+        logger.debug("xml_parse_card_completed")
+        return result
     except json.JSONDecodeError as e:
+        logger.warning(
+            "xml_parse_card_json_error",
+            tag="card",
+            error=str(e),
+            content_length=len(card_json),
+        )
         preview = card_json[:200] + "..." if len(card_json) > 200 else card_json
         raise ValueError(f"Invalid JSON in <card>: {e}. Content was: {preview}")
 
@@ -156,9 +180,12 @@ def parse_style_response(response: str) -> dict[str, Any]:
         ValueError: If neither tag is found or JSON is invalid
         XmlParseError: If XML parsing fails
     """
+    logger.debug("xml_parse_style_started", response_length=len(response))
+
     # Check for question first
     if "<question>" in response:
         content = parse_xml_content(response, "question")
+        logger.debug("xml_parse_style_completed", result_type="question")
         return {"type": "question", "explanation": content}
     elif "<style_update>" in response:
         style_json = parse_xml_content(response, "style_update")
@@ -174,9 +201,16 @@ def parse_style_response(response: str) -> dict[str, Any]:
                 result["physics"] = data["physics"]
             if "explanation" in data:
                 result["explanation"] = data["explanation"]
+            logger.debug("xml_parse_style_completed", result_type="update")
             return result
         except json.JSONDecodeError as e:
+            logger.warning(
+                "xml_parse_style_json_error",
+                tag="style_update",
+                error=str(e),
+            )
             raise ValueError(f"Invalid JSON in <style_update>: {e}")
 
+    logger.warning("xml_parse_style_no_tag", response_length=len(response))
     preview = response[:200] + "..." if len(response) > 200 else response
     raise ValueError(f"Response must contain <style_update> or <question>. Response preview: {preview}")

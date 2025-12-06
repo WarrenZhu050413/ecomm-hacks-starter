@@ -1,7 +1,7 @@
 """Image generation router for Nano Banana endpoints."""
 
 import base64
-import logging
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -13,8 +13,9 @@ from app.models.image import (
     ImageResponse,
 )
 from app.services.gemini import GeminiService
+from app.services.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/image", tags=["image"])
 
@@ -37,10 +38,27 @@ async def generate_image(
     Send a text prompt and receive generated images.
     Images are returned as base64-encoded data.
     """
+    start_time = time.time()
+    model_name = request.model or "gemini-3-pro-image-preview"
+    logger.info(
+        "image_generate_started",
+        model=model_name,
+        prompt_length=len(request.prompt),
+    )
+
     try:
         result = await gemini.generate_image(
             prompt=request.prompt,
-            model=request.model or "gemini-3-pro-image-preview",
+            model=model_name,
+        )
+
+        elapsed = time.time() - start_time
+        logger.info(
+            "image_generate_completed",
+            model=result.model,
+            elapsed_seconds=round(elapsed, 3),
+            image_count=len(result.images),
+            usage=result.usage,
         )
 
         return ImageResponse(
@@ -51,7 +69,14 @@ async def generate_image(
         )
 
     except Exception as e:
-        logger.error(f"Image generation error: {e}", exc_info=True)
+        elapsed = time.time() - start_time
+        logger.error(
+            "image_generate_failed",
+            model=model_name,
+            elapsed_seconds=round(elapsed, 3),
+            error_type=type(e).__name__,
+            error=str(e),
+        )
         raise HTTPException(status_code=503, detail=f"Image generation error: {str(e)}")
 
 
@@ -65,6 +90,15 @@ async def edit_image(
     Send an image (base64) with editing instructions.
     Returns the edited image as base64-encoded data.
     """
+    start_time = time.time()
+    model_name = request.model or "gemini-3-pro-image-preview"
+    logger.info(
+        "image_edit_started",
+        model=model_name,
+        prompt_length=len(request.prompt),
+        mime_type=request.mime_type,
+    )
+
     try:
         # Decode base64 image
         image_data = base64.b64decode(request.image)
@@ -73,7 +107,16 @@ async def edit_image(
             prompt=request.prompt,
             image_data=image_data,
             image_mime_type=request.mime_type,
-            model=request.model or "gemini-3-pro-image-preview",
+            model=model_name,
+        )
+
+        elapsed = time.time() - start_time
+        logger.info(
+            "image_edit_completed",
+            model=result.model,
+            elapsed_seconds=round(elapsed, 3),
+            image_count=len(result.images),
+            usage=result.usage,
         )
 
         return ImageResponse(
@@ -84,7 +127,14 @@ async def edit_image(
         )
 
     except Exception as e:
-        logger.error(f"Image editing error: {e}", exc_info=True)
+        elapsed = time.time() - start_time
+        logger.error(
+            "image_edit_failed",
+            model=model_name,
+            elapsed_seconds=round(elapsed, 3),
+            error_type=type(e).__name__,
+            error=str(e),
+        )
         raise HTTPException(status_code=503, detail=f"Image editing error: {str(e)}")
 
 
