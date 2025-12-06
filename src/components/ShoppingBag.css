@@ -1,15 +1,17 @@
 /**
  * ShoppingBag - Slide-in sidebar styles
+ * Dark luxe aesthetic matching the gallery UI
  */
 
 /* Backdrop */
 .bag-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.75);
   z-index: 600;
   opacity: 0;
   transition: opacity 0.3s ease;
+  backdrop-filter: blur(4px);
 }
 
 .bag-backdrop.visible {
@@ -24,14 +26,15 @@
   height: 100vh;
   width: 400px;
   max-width: 90vw;
-  background: var(--cream);
-  border-left: 1px solid rgba(139, 115, 85, 0.15);
+  background: rgba(26, 24, 21, 0.97);
+  backdrop-filter: blur(24px);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
   z-index: 650;
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+  box-shadow: -12px 0 48px rgba(0, 0, 0, 0.5);
 }
 
 .bag-panel.visible {
@@ -44,15 +47,16 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(139, 115, 85, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .bag-header h2 {
   font-family: 'Crimson Pro', serif;
   font-size: 1.35rem;
   font-weight: 400;
-  color: var(--sepia);
+  color: #fff;
   margin: 0;
+  letter-spacing: 0.02em;
 }
 
 .bag-close {
@@ -61,8 +65,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: 1px solid rgba(139, 115, 85, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -71,12 +75,16 @@
 .bag-close svg {
   width: 18px;
   height: 18px;
-  color: var(--sepia);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .bag-close:hover {
-  background: rgba(139, 115, 85, 0.08);
-  border-color: rgba(139, 115, 85, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.bag-close:hover svg {
+  color: #fff;
 }
 
 /* Items */
@@ -84,6 +92,24 @@
   flex: 1;
   overflow-y: auto;
   padding: 1rem 1.5rem;
+}
+
+/* Scrollbar styling */
+.bag-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.bag-items::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.bag-items::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.bag-items::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Empty State */
@@ -100,20 +126,19 @@
 .bag-empty-icon {
   width: 64px;
   height: 64px;
-  color: var(--sepia-light);
-  opacity: 0.4;
+  color: rgba(255, 255, 255, 0.2);
   margin-bottom: 1rem;
 }
 
 .bag-empty p {
   font-size: 1.1rem;
-  color: var(--pencil);
+  color: rgba(255, 255, 255, 0.8);
   margin: 0 0 0.5rem;
 }
 
 .bag-empty span {
   font-size: 0.85rem;
-  color: var(--sepia-light);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 /* Item */
@@ -121,7 +146,7 @@
   display: flex;
   gap: 1rem;
   padding: 1rem 0;
-  border-bottom: 1px solid rgba(139, 115, 85, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .bag-item:last-child {
@@ -134,13 +159,14 @@
   object-fit: cover;
   border-radius: 10px;
   flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .bag-item-details {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 
 .bag-item-brand {
@@ -148,19 +174,19 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--sepia-light);
+  color: #c9a227;
 }
 
 .bag-item-name {
   font-family: 'Crimson Pro', serif;
   font-size: 1rem;
-  color: var(--pencil);
+  color: #fff;
 }
 
 .bag-item-price {
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--pencil);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .bag-item-actions {
@@ -175,8 +201,9 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  background: rgba(139, 115, 85, 0.06);
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
   padding: 2px;
 }
 
@@ -188,15 +215,16 @@
   justify-content: center;
   background: transparent;
   border: none;
-  color: var(--pencil);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 1rem;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.15s ease;
+  border-radius: 6px;
+  transition: all 0.15s ease;
 }
 
 .quantity-btn:hover {
-  background: rgba(139, 115, 85, 0.12);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 .quantity-value {
@@ -204,14 +232,14 @@
   text-align: center;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--pencil);
+  color: #fff;
 }
 
 .remove-btn {
   background: transparent;
   border: none;
   font-size: 0.75rem;
-  color: var(--vermillion);
+  color: #e85c4a;
   cursor: pointer;
   padding: 0;
   opacity: 0.7;
@@ -225,8 +253,8 @@
 /* Footer */
 .bag-footer {
   padding: 1.25rem 1.5rem;
-  border-top: 1px solid rgba(139, 115, 85, 0.1);
-  background: rgba(250, 248, 243, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 18, 16, 0.95);
 }
 
 .bag-total {
@@ -235,29 +263,228 @@
   align-items: center;
   margin-bottom: 1rem;
   font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .total-amount {
   font-size: 1.35rem;
   font-weight: 600;
-  color: var(--pencil);
+  color: #fff;
 }
 
 .checkout-btn {
+  position: relative;
   width: 100%;
   padding: 1rem;
-  background: var(--pencil);
+  background: linear-gradient(
+    135deg,
+    #b8941f 0%,
+    #d4af37 25%,
+    #e8c84a 50%,
+    #d4af37 75%,
+    #b8941f 100%
+  );
+  background-size: 200% 200%;
+  background-position: 0% 50%;
   border: none;
   border-radius: 12px;
-  color: var(--cream);
+  color: #1a1815;
   font-family: inherit;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 4px 16px rgba(201, 162, 39, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+/* Shine overlay */
+.checkout-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0) 60%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 .checkout-btn:hover {
-  background: var(--pencil-light);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 28px rgba(201, 162, 39, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background-position: 100% 50%;
+}
+
+.checkout-btn:hover::before {
+  animation: shine-sweep 1.2s ease forwards;
+}
+
+@keyframes shine-sweep {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.checkout-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    0 2px 8px rgba(201, 162, 39, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Loading state */
+.checkout-btn.loading {
+  pointer-events: none;
+}
+
+.checkout-btn .btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.checkout-btn .loading-spinner {
+  font-family: monospace;
+  font-size: 1.1rem;
+  animation: spin-chars 0.6s steps(4) infinite;
+}
+
+@keyframes spin-chars {
+  0% { content: '◐'; }
+  25% { content: '◓'; }
+  50% { content: '◑'; }
+  75% { content: '◒'; }
+}
+
+/* Dimmed state when confirmation is shown */
+.bag-panel.dimmed {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Order Confirmation Popup */
+.order-confirmation {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 380px;
+  max-width: 90vw;
+  background: rgba(30, 28, 26, 0.97);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  z-index: 700;
+  animation: confirmationSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+@keyframes confirmationSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.confirmation-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.25rem;
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.2) 0%, rgba(201, 162, 39, 0.1) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: iconPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+}
+
+@keyframes iconPop {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.confirmation-icon svg {
+  width: 32px;
+  height: 32px;
+  color: #c9a227;
+}
+
+.order-confirmation h2 {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #fff;
+  margin: 0 0 0.5rem;
+}
+
+.order-confirmation p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 1.5rem;
+}
+
+.confirmation-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.confirmation-order {
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #c9a227;
+  letter-spacing: 0.05em;
+}
+
+.confirmation-email {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.confirmation-btn {
+  width: 100%;
+  padding: 0.9rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirmation-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
 }

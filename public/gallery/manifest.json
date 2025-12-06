@@ -2,6 +2,7 @@
   {
     "id": "gallery-0",
     "sceneUrl": "/gallery/scene_0.png",
+    "baseUrl": "/gallery/base_0.jpg",
     "maskUrl": "/gallery/mask_0.png",
     "productImageUrl": "/gallery/product_0.jpg",
     "product": {
@@ -16,6 +17,7 @@
   {
     "id": "gallery-1",
     "sceneUrl": "/gallery/scene_1.png",
+    "baseUrl": "/gallery/base_1.jpg",
     "maskUrl": "/gallery/mask_1.png",
     "productImageUrl": "/gallery/product_1.jpg",
     "product": {
@@ -24,12 +26,13 @@
       "brand": "Gucci",
       "price": 2350,
       "currency": "USD",
-      "description": "Matelass\u00e9 leather shoulder bag"
+      "description": "Matelassé leather shoulder bag"
     }
   },
   {
     "id": "gallery-2",
     "sceneUrl": "/gallery/scene_2.png",
+    "baseUrl": "/gallery/base_2.jpg",
     "maskUrl": "/gallery/mask_2.png",
     "productImageUrl": "/gallery/product_2.jpg",
     "product": {
@@ -44,6 +47,7 @@
   {
     "id": "gallery-3",
     "sceneUrl": "/gallery/scene_3.png",
+    "baseUrl": "/gallery/base_3.jpg",
     "maskUrl": "/gallery/mask_3.png",
     "productImageUrl": "/gallery/product_3.jpg",
     "product": {
@@ -58,6 +62,7 @@
   {
     "id": "gallery-4",
     "sceneUrl": "/gallery/scene_4.png",
+    "baseUrl": "/gallery/base_4.jpg",
     "maskUrl": "/gallery/mask_4.png",
     "productImageUrl": "/gallery/product_4.jpg",
     "product": {
@@ -72,6 +77,7 @@
   {
     "id": "gallery-5",
     "sceneUrl": "/gallery/scene_5.png",
+    "baseUrl": "/gallery/base_5.jpg",
     "maskUrl": "/gallery/mask_5.png",
     "productImageUrl": "/gallery/product_5.jpg",
     "product": {
@@ -86,6 +92,7 @@
   {
     "id": "gallery-6",
     "sceneUrl": "/gallery/scene_6.png",
+    "baseUrl": "/gallery/base_6.jpg",
     "maskUrl": "/gallery/mask_6.png",
     "productImageUrl": "/gallery/product_6.jpg",
     "product": {
@@ -100,6 +107,7 @@
   {
     "id": "gallery-7",
     "sceneUrl": "/gallery/scene_7.png",
+    "baseUrl": "/gallery/base_7.jpg",
     "maskUrl": "/gallery/mask_7.png",
     "productImageUrl": "/gallery/product_7.jpg",
     "product": {
@@ -114,6 +122,7 @@
   {
     "id": "gallery-8",
     "sceneUrl": "/gallery/scene_8.png",
+    "baseUrl": "/gallery/base_8.jpg",
     "maskUrl": "/gallery/mask_8.png",
     "productImageUrl": "/gallery/product_8.jpg",
     "product": {
@@ -128,6 +137,7 @@
   {
     "id": "gallery-9",
     "sceneUrl": "/gallery/scene_9.png",
+    "baseUrl": "/gallery/base_9.jpg",
     "maskUrl": "/gallery/mask_9.png",
     "productImageUrl": "/gallery/product_9.jpg",
     "product": {
@@ -142,6 +152,7 @@
   {
     "id": "gallery-10",
     "sceneUrl": "/gallery/scene_10.png",
+    "baseUrl": "/gallery/base_10.jpg",
     "maskUrl": "/gallery/mask_10.png",
     "productImageUrl": "/gallery/product_10.jpg",
     "product": {
@@ -156,6 +167,7 @@
   {
     "id": "gallery-11",
     "sceneUrl": "/gallery/scene_11.png",
+    "baseUrl": "/gallery/base_11.jpg",
     "maskUrl": "/gallery/mask_11.png",
     "productImageUrl": "/gallery/product_11.jpg",
     "product": {
@@ -170,6 +182,7 @@
   {
     "id": "gallery-12",
     "sceneUrl": "/gallery/scene_12.png",
+    "baseUrl": "/gallery/base_12.jpg",
     "maskUrl": "/gallery/mask_12.png",
     "productImageUrl": "/gallery/product_12.jpg",
     "product": {

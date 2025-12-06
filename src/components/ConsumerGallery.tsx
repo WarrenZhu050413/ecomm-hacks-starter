@@ -28,6 +28,7 @@ import './ConsumerGallery.css'
 interface GalleryItem {
   id: string
   sceneUrl: string
+  baseUrl: string  // Original scene without product
   maskUrl: string
   productImageUrl: string
   product: Product
@@ -38,6 +39,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-0",
     sceneUrl: "/gallery/scene_0.png",
+    baseUrl: "/gallery/base_0.jpg",
     maskUrl: "/gallery/mask_0.png",
     productImageUrl: "/gallery/product_0.jpg",
     product: {
@@ -52,6 +54,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-1",
     sceneUrl: "/gallery/scene_1.png",
+    baseUrl: "/gallery/base_1.jpg",
     maskUrl: "/gallery/mask_1.png",
     productImageUrl: "/gallery/product_1.jpg",
     product: {
@@ -66,6 +69,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-2",
     sceneUrl: "/gallery/scene_2.png",
+    baseUrl: "/gallery/base_2.jpg",
     maskUrl: "/gallery/mask_2.png",
     productImageUrl: "/gallery/product_2.jpg",
     product: {
@@ -80,6 +84,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-3",
     sceneUrl: "/gallery/scene_3.png",
+    baseUrl: "/gallery/base_3.jpg",
     maskUrl: "/gallery/mask_3.png",
     productImageUrl: "/gallery/product_3.jpg",
     product: {
@@ -94,6 +99,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-4",
     sceneUrl: "/gallery/scene_4.png",
+    baseUrl: "/gallery/base_4.jpg",
     maskUrl: "/gallery/mask_4.png",
     productImageUrl: "/gallery/product_4.jpg",
     product: {
@@ -108,6 +114,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-5",
     sceneUrl: "/gallery/scene_5.png",
+    baseUrl: "/gallery/base_5.jpg",
     maskUrl: "/gallery/mask_5.png",
     productImageUrl: "/gallery/product_5.jpg",
     product: {
@@ -122,6 +129,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-6",
     sceneUrl: "/gallery/scene_6.png",
+    baseUrl: "/gallery/base_6.jpg",
     maskUrl: "/gallery/mask_6.png",
     productImageUrl: "/gallery/product_6.jpg",
     product: {
@@ -136,6 +144,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-7",
     sceneUrl: "/gallery/scene_7.png",
+    baseUrl: "/gallery/base_7.jpg",
     maskUrl: "/gallery/mask_7.png",
     productImageUrl: "/gallery/product_7.jpg",
     product: {
@@ -150,6 +159,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-8",
     sceneUrl: "/gallery/scene_8.png",
+    baseUrl: "/gallery/base_8.jpg",
     maskUrl: "/gallery/mask_8.png",
     productImageUrl: "/gallery/product_8.jpg",
     product: {
@@ -164,6 +174,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-9",
     sceneUrl: "/gallery/scene_9.png",
+    baseUrl: "/gallery/base_9.jpg",
     maskUrl: "/gallery/mask_9.png",
     productImageUrl: "/gallery/product_9.jpg",
     product: {
@@ -178,6 +189,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-10",
     sceneUrl: "/gallery/scene_10.png",
+    baseUrl: "/gallery/base_10.jpg",
     maskUrl: "/gallery/mask_10.png",
     productImageUrl: "/gallery/product_10.jpg",
     product: {
@@ -192,6 +204,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-11",
     sceneUrl: "/gallery/scene_11.png",
+    baseUrl: "/gallery/base_11.jpg",
     maskUrl: "/gallery/mask_11.png",
     productImageUrl: "/gallery/product_11.jpg",
     product: {
@@ -206,6 +219,7 @@ const GALLERY_ITEMS: GalleryItem[] = [
   {
     id: "gallery-12",
     sceneUrl: "/gallery/scene_12.png",
+    baseUrl: "/gallery/base_12.jpg",
     maskUrl: "/gallery/mask_12.png",
     productImageUrl: "/gallery/product_12.jpg",
     product: {
@@ -270,15 +284,24 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
   const [activeProduct, setActiveProduct] = useState<{
     product: Product
     position: { x: number; y: number }
+    productBounds: { left: number; right: number; top: number; bottom: number }
     cardId: string
+    sceneImageUrl: string
   } | null>(null)
   const [productHoverCardId, setProductHoverCardId] = useState<string | null>(null)
   const [productClickLocked, setProductClickLocked] = useState(false) // When true, popup stays until click elsewhere
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Removed products state (cards where product has been added to bag)
+  const [removedProductCardIds, setRemovedProductCardIds] = useState<Set<string>>(new Set())
+
   // Drag state
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null)
   const dragStartRef = useRef<{ x: number; y: number; cardX: number; cardY: number } | null>(null)
+
+  // Resize state
+  const [resizingCardId, setResizingCardId] = useState<string | null>(null)
+  const resizeStartRef = useRef<{ x: number; y: number; cardWidth: number; cardHeight: number } | null>(null)
 
   // Refs
   const containerRef = useRef<HTMLDivElement>(null)
@@ -324,10 +347,10 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     const galleryItem = items[Math.floor(Math.random() * items.length)]!
     usedGalleryIds.current.add(galleryItem.id)
 
-    // Pinterest-style: smaller cards, more variety in sizes
-    const widthOptions = [160, 180, 200, 220]
+    // Card sizes - 30% larger than original Pinterest-style
+    const widthOptions = [208, 234, 260, 286]
     const width = widthOptions[Math.floor(Math.random() * widthOptions.length)]!
-    // More height variety for Pinterest masonry effect
+    // Height variety for masonry effect
     const heightRatio = 0.7 + Math.random() * 0.6 // 0.7 to 1.3 (mix of portrait/landscape)
     const height = Math.floor(width * heightRatio)
 
@@ -424,16 +447,36 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
   }, [])
 
   // Check if mouse is over product area using mask
+  // Accounts for object-fit: cover cropping
   const isMouseOverProductArea = useCallback((cardId: string, mouseX: number, mouseY: number, cardRect: DOMRect): boolean => {
     const imageData = maskImageDataRefs.current.get(cardId)
     const canvas = maskCanvasRefs.current.get(cardId)
     if (!imageData || !canvas) return false
 
-    // Map mouse position to mask coordinates
-    const scaleX = canvas.width / cardRect.width
-    const scaleY = canvas.height / cardRect.height
-    const maskX = Math.floor((mouseX - cardRect.left) * scaleX)
-    const maskY = Math.floor((mouseY - cardRect.top) * scaleY)
+    // Calculate how object-fit: cover affects the image display
+    const cardAspect = cardRect.width / cardRect.height
+    const imageAspect = canvas.width / canvas.height
+
+    let visibleWidth: number, visibleHeight: number
+    let offsetX = 0, offsetY = 0
+
+    if (imageAspect > cardAspect) {
+      // Image is wider than card - sides are cropped
+      visibleHeight = canvas.height
+      visibleWidth = canvas.height * cardAspect
+      offsetX = (canvas.width - visibleWidth) / 2
+    } else {
+      // Image is taller than card - top/bottom are cropped
+      visibleWidth = canvas.width
+      visibleHeight = canvas.width / cardAspect
+      offsetY = (canvas.height - visibleHeight) / 2
+    }
+
+    // Map mouse position to mask coordinates (accounting for crop)
+    const relX = (mouseX - cardRect.left) / cardRect.width
+    const relY = (mouseY - cardRect.top) / cardRect.height
+    const maskX = Math.floor(offsetX + relX * visibleWidth)
+    const maskY = Math.floor(offsetY + relY * visibleHeight)
 
     // Bounds check
     if (maskX < 0 || maskX >= canvas.width || maskY < 0 || maskY >= canvas.height) {
@@ -448,6 +491,73 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     const brightness = (r + g + b) / 3
 
     return brightness > 128 // White = product area
+  }, [])
+
+  // Calculate product bounding box from mask (in screen coordinates)
+  // Accounts for object-fit: cover cropping
+  const getProductBounds = useCallback((cardId: string, cardRect: DOMRect): { left: number; right: number; top: number; bottom: number } | null => {
+    const imageData = maskImageDataRefs.current.get(cardId)
+    const canvas = maskCanvasRefs.current.get(cardId)
+    if (!imageData || !canvas) return null
+
+    // Calculate how object-fit: cover affects the image display
+    const cardAspect = cardRect.width / cardRect.height
+    const imageAspect = canvas.width / canvas.height
+
+    let visibleWidth: number, visibleHeight: number
+    let offsetX = 0, offsetY = 0
+
+    if (imageAspect > cardAspect) {
+      // Image is wider than card - sides are cropped
+      visibleHeight = canvas.height
+      visibleWidth = canvas.height * cardAspect
+      offsetX = (canvas.width - visibleWidth) / 2
+    } else {
+      // Image is taller than card - top/bottom are cropped
+      visibleWidth = canvas.width
+      visibleHeight = canvas.width / cardAspect
+      offsetY = (canvas.height - visibleHeight) / 2
+    }
+
+    let minX = canvas.width
+    let maxX = 0
+    let minY = canvas.height
+    let maxY = 0
+
+    // Find bounding box of white pixels in mask (only within visible area)
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const pixelIndex = (y * canvas.width + x) * 4
+        const r = imageData.data[pixelIndex] ?? 0
+        const g = imageData.data[pixelIndex + 1] ?? 0
+        const b = imageData.data[pixelIndex + 2] ?? 0
+        const brightness = (r + g + b) / 3
+
+        if (brightness > 128) {
+          // Check if this pixel is within the visible cropped area
+          if (x >= offsetX && x <= offsetX + visibleWidth &&
+              y >= offsetY && y <= offsetY + visibleHeight) {
+            if (x < minX) minX = x
+            if (x > maxX) maxX = x
+            if (y < minY) minY = y
+            if (y > maxY) maxY = y
+          }
+        }
+      }
+    }
+
+    if (minX >= maxX || minY >= maxY) return null
+
+    // Convert mask coordinates to screen coordinates (accounting for crop)
+    const screenX = (maskX: number) => cardRect.left + ((maskX - offsetX) / visibleWidth) * cardRect.width
+    const screenY = (maskY: number) => cardRect.top + ((maskY - offsetY) / visibleHeight) * cardRect.height
+
+    return {
+      left: screenX(minX),
+      right: screenX(maxX),
+      top: screenY(minY),
+      bottom: screenY(maxY),
+    }
   }, [])
 
   // Initialize with cards (Pinterest-like high density)
@@ -541,12 +651,24 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     checkSpawn()
   }, [scrollOffset, totalHeight, createCard, loadMaskForCard])
 
-  // Handle Escape key to close expanded view
+  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Escape to close expanded view
       if (e.key === 'Escape' && expandedCardId) {
         setExpandedCardId(null)
         setCards(prev => prev.map(c => ({ ...c, isExpanded: false })))
+        return
+      }
+
+      // Arrow keys and j/k for scrolling
+      const scrollAmount = 80
+      if (e.key === 'ArrowUp' || e.key === 'k') {
+        e.preventDefault()
+        setScrollOffset(prev => Math.max(0, prev - scrollAmount))
+      } else if (e.key === 'ArrowDown' || e.key === 'j') {
+        e.preventDefault()
+        setScrollOffset(prev => prev + scrollAmount)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
@@ -575,21 +697,79 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
   // Calculate visible Y position
   const getVisibleY = (absoluteY: number) => absoluteY - scrollOffset
 
-  // Calculate fade opacity based on position
-  const getFadeOpacity = (visibleY: number, cardHeight: number) => {
+  // Calculate CSS mask for non-uniform opacity within a card (quadratic fade)
+  const getCardMaskStyle = (visibleY: number, cardHeight: number): React.CSSProperties => {
     const viewportHeight = window.innerHeight
     const fadeZone = viewportHeight * 0.125
 
     const cardTop = visibleY
     const cardBottom = visibleY + cardHeight
 
-    if (cardTop < fadeZone) {
-      return Math.max(0, cardTop / fadeZone)
+    // Check if card overlaps with fade zones
+    const inTopFade = cardTop < fadeZone
+    const inBottomFade = cardBottom > viewportHeight - fadeZone
+
+    if (!inTopFade && !inBottomFade) {
+      return {} // No mask needed
     }
-    if (cardBottom > viewportHeight - fadeZone) {
-      return Math.max(0, (viewportHeight - cardBottom + cardHeight) / fadeZone)
+
+    // Build gradient stops for mask
+    const stops: string[] = []
+
+    if (inTopFade) {
+      // How much of card is in top fade zone
+      const fadeEnd = Math.min(fadeZone - cardTop, cardHeight)
+      const fadeEndPercent = (fadeEnd / cardHeight) * 100
+
+      // Opacity at card top (quadratic)
+      const topT = Math.max(0, cardTop / fadeZone)
+      const topOpacity = topT * topT
+
+      // Opacity at fade zone boundary
+      if (fadeEndPercent < 100) {
+        stops.push(`rgba(0,0,0,${topOpacity}) 0%`)
+        stops.push(`rgba(0,0,0,1) ${fadeEndPercent}%`)
+      } else {
+        // Entire card in top fade zone
+        const bottomT = Math.max(0, cardBottom / fadeZone)
+        const bottomOpacity = bottomT * bottomT
+        stops.push(`rgba(0,0,0,${topOpacity}) 0%`)
+        stops.push(`rgba(0,0,0,${bottomOpacity}) 100%`)
+      }
     }
-    return 1
+
+    if (inBottomFade && !inTopFade) {
+      // How much of card is above bottom fade zone
+      const fadeStart = viewportHeight - fadeZone - cardTop
+      const fadeStartPercent = Math.max(0, (fadeStart / cardHeight) * 100)
+
+      // Opacity at card bottom (quadratic)
+      const bottomT = Math.max(0, (viewportHeight - cardBottom) / fadeZone)
+      const bottomOpacity = bottomT * bottomT
+
+      stops.push(`rgba(0,0,0,1) 0%`)
+      stops.push(`rgba(0,0,0,1) ${fadeStartPercent}%`)
+      stops.push(`rgba(0,0,0,${bottomOpacity}) 100%`)
+    } else if (inBottomFade && inTopFade) {
+      // Card spans both fade zones - already handled top, add bottom
+      const fadeStart = viewportHeight - fadeZone - cardTop
+      const fadeStartPercent = Math.max(0, (fadeStart / cardHeight) * 100)
+      const bottomT = Math.max(0, (viewportHeight - cardBottom) / fadeZone)
+      const bottomOpacity = bottomT * bottomT
+
+      // Merge with existing stops
+      if (stops.length > 0) {
+        stops.push(`rgba(0,0,0,1) ${fadeStartPercent}%`)
+        stops.push(`rgba(0,0,0,${bottomOpacity}) 100%`)
+      }
+    }
+
+    if (stops.length === 0) return {}
+
+    return {
+      maskImage: `linear-gradient(to bottom, ${stops.join(', ')})`,
+      WebkitMaskImage: `linear-gradient(to bottom, ${stops.join(', ')})`,
+    }
   }
 
   // Handle hover
@@ -631,11 +811,16 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
       if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
 
       hoverTimeoutRef.current = setTimeout(() => {
-        setActiveProduct({
-          product: card.galleryItem.product,
-          position: { x: e.clientX, y: e.clientY },
-          cardId: card.id,
-        })
+        const bounds = getProductBounds(card.id, rect)
+        if (bounds) {
+          setActiveProduct({
+            product: card.galleryItem.product,
+            position: { x: e.clientX, y: e.clientY },
+            productBounds: bounds,
+            cardId: card.id,
+            sceneImageUrl: card.galleryItem.sceneUrl,
+          })
+        }
       }, 300) // 300ms delay before showing product card
     } else {
       if (hoverTimeoutRef.current) {
@@ -651,7 +836,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
         }, 100)
       }
     }
-  }, [isMouseOverProductArea, productClickLocked])
+  }, [isMouseOverProductArea, productClickLocked, getProductBounds])
 
   // Handle click on product area - shows popup that stays until click elsewhere
   const handleCardClick = useCallback((card: ImageCard, e: React.MouseEvent<HTMLDivElement>) => {
@@ -664,20 +849,30 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
       // Prevent triggering drag or double-click
       e.stopPropagation()
 
-      // Show popup and lock it
-      setActiveProduct({
-        product: card.galleryItem.product,
-        position: { x: e.clientX, y: e.clientY },
-        cardId: card.id,
-      })
-      setProductClickLocked(true)
+      const bounds = getProductBounds(card.id, rect)
+      if (bounds) {
+        // Show popup and lock it
+        setActiveProduct({
+          product: card.galleryItem.product,
+          position: { x: e.clientX, y: e.clientY },
+          productBounds: bounds,
+          cardId: card.id,
+          sceneImageUrl: card.galleryItem.sceneUrl,
+        })
+        setProductClickLocked(true)
 
-      // Clear any pending hover timeout
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current)
+        // Clear any pending hover timeout
+        if (hoverTimeoutRef.current) {
+          clearTimeout(hoverTimeoutRef.current)
+        }
       }
+    } else if (productClickLocked) {
+      // Clicked elsewhere on the card (not on product) - dismiss popup
+      setActiveProduct(null)
+      setProductClickLocked(false)
+      setProductHoverCardId(null)
     }
-  }, [isMouseOverProductArea])
+  }, [isMouseOverProductArea, getProductBounds, productClickLocked])
 
   // Handle click elsewhere to dismiss click-locked popup
   useEffect(() => {
@@ -727,6 +922,13 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     const card = cards.find(c => c.id === cardId)
     if (!card) return
 
+    // Don't start drag if clicking on product area
+    const cardElement = e.currentTarget as HTMLElement
+    const rect = cardElement.getBoundingClientRect()
+    if (isMouseOverProductArea(cardId, e.clientX, e.clientY, rect)) {
+      return // Don't start dragging when clicking on product
+    }
+
     setDraggingCardId(cardId)
     dragStartRef.current = {
       x: e.clientX,
@@ -734,7 +936,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
       cardX: card.x,
       cardY: card.y,
     }
-  }, [cards])
+  }, [cards, isMouseOverProductArea])
 
   const handleDragMove = useCallback((e: MouseEvent) => {
     const dragStart = dragStartRef.current
@@ -786,8 +988,70 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     }
   }, [draggingCardId, handleDragMove, handleDragEnd])
 
+  // Resize handlers
+  const handleResizeStart = useCallback((cardId: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation() // Prevent drag from starting
+    const card = cards.find(c => c.id === cardId)
+    if (!card) return
+
+    setResizingCardId(cardId)
+    resizeStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      cardWidth: card.width,
+      cardHeight: card.height,
+    }
+  }, [cards])
+
+  const handleResizeMove = useCallback((e: MouseEvent) => {
+    const resizeStart = resizeStartRef.current
+    if (!resizeStart || !resizingCardId) return
+
+    const deltaX = e.clientX - resizeStart.x
+    const deltaY = e.clientY - resizeStart.y
+
+    // Use the larger delta to maintain aspect ratio
+    const delta = Math.max(deltaX, deltaY)
+
+    setCards(prev => prev.map(card => {
+      if (card.id !== resizingCardId) return card
+
+      const aspectRatio = resizeStart.cardHeight / resizeStart.cardWidth
+      let newWidth = Math.max(120, Math.min(400, resizeStart.cardWidth + delta))
+      let newHeight = Math.round(newWidth * aspectRatio)
+
+      // Clamp height as well
+      newHeight = Math.max(100, Math.min(500, newHeight))
+
+      return {
+        ...card,
+        width: newWidth,
+        height: newHeight,
+      }
+    }))
+  }, [resizingCardId])
+
+  const handleResizeEnd = useCallback(() => {
+    setResizingCardId(null)
+    resizeStartRef.current = null
+  }, [])
+
+  // Add global mouse listeners for resize
+  useEffect(() => {
+    if (resizingCardId) {
+      window.addEventListener('mousemove', handleResizeMove)
+      window.addEventListener('mouseup', handleResizeEnd)
+      return () => {
+        window.removeEventListener('mousemove', handleResizeMove)
+        window.removeEventListener('mouseup', handleResizeEnd)
+      }
+    }
+  }, [resizingCardId, handleResizeMove, handleResizeEnd])
+
   // Shopping handlers
-  const handleAddToBag = useCallback((product: Product) => {
+  const handleAddToBag = useCallback((product: Product, cardId: string) => {
+    // Add to bag immediately
     setBag(prev => {
       const existing = prev.find(item => item.product.id === product.id)
       if (existing) {
@@ -799,22 +1063,44 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
       }
       return [...prev, { product, quantity: 1, addedAt: new Date() }]
     })
+
+    // Mark this card as having its product removed (triggers fade animation via CSS)
+    setRemovedProductCardIds(prev => new Set(prev).add(cardId))
+
+    // Close the popup
     setActiveProduct(null)
+    setProductClickLocked(false)
   }, [])
 
-  const handleBuyNow = useCallback((product: Product) => {
-    handleAddToBag(product)
-    // 1-click checkout if payment info is saved
-    if (paymentInfo && paymentInfo.cardNumber) {
-      setPurchaseSuccess(true)
-      setBag([])
-      setTimeout(() => {
-        setPurchaseSuccess(false)
-      }, 3000)
-    } else {
-      setShowPayment(true)
-    }
-  }, [handleAddToBag, paymentInfo])
+  // Revert a removed product (put it back in the image)
+  const handleRevertProduct = useCallback((cardId: string, productId: string) => {
+    // Remove from bag
+    setBag(prev => {
+      const item = prev.find(i => i.product.id === productId)
+      if (item && item.quantity > 1) {
+        return prev.map(i =>
+          i.product.id === productId
+            ? { ...i, quantity: i.quantity - 1 }
+            : i
+        )
+      }
+      return prev.filter(i => i.product.id !== productId)
+    })
+
+    // Restore product to card
+    setRemovedProductCardIds(prev => {
+      const next = new Set(prev)
+      next.delete(cardId)
+      return next
+    })
+  }, [])
+
+  const handleBuyNow = useCallback(() => {
+    // Buy Now confirmation handled in ProductOverlay
+    // Just close the popup when confirmation is dismissed
+    setActiveProduct(null)
+    setProductClickLocked(false)
+  }, [])
 
   const handleRemoveFromBag = useCallback((productId: string) => {
     setBag(prev => prev.filter(item => item.product.id !== productId))
@@ -907,8 +1193,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
         {/* Cards */}
         {visibleCards.map(card => {
           const visibleY = getVisibleY(card.y)
-          const fadeOpacity = card.isExpanded ? 1 : getFadeOpacity(visibleY, card.height)
-          const finalOpacity = card.opacity * fadeOpacity
+          const maskStyle = card.isExpanded ? {} : getCardMaskStyle(visibleY, card.height)
 
           if (card.isExpanded) {
             return (
@@ -926,20 +1211,40 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                   onMouseMove={e => handleCardMouseMove(card, e)}
                   onMouseLeave={() => handleCardMouseLeave(card.id)}
                 >
+                  {/* Scene image with product */}
                   <img
                     src={card.galleryItem.sceneUrl}
                     alt=""
-                    className="expanded-card-image"
+                    className={`expanded-card-image ${removedProductCardIds.has(card.id) ? 'product-removed' : ''}`}
                   />
+                  {/* Base layer: shown when product is removed (crossfade) */}
+                  {removedProductCardIds.has(card.id) && (
+                    <img
+                      src={card.galleryItem.baseUrl}
+                      alt=""
+                      className="expanded-card-image expanded-card-base-revealed"
+                    />
+                  )}
                   {/* Product highlight overlay for expanded view */}
-                  {productHoverCardId === card.id && highlightDataUrlRefs.current.get(card.id) && (
+                  {!removedProductCardIds.has(card.id) && productHoverCardId === card.id && highlightDataUrlRefs.current.get(card.id) && (
                     <img
                       src={highlightDataUrlRefs.current.get(card.id)}
                       alt=""
                       className="expanded-highlight-overlay"
                     />
                   )}
-                  <div className="expanded-esc-hint">esc</div>
+                  {/* Show Original Image button - shows when product is removed */}
+                  {removedProductCardIds.has(card.id) && (
+                    <button
+                      className="revert-button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleRevertProduct(card.id, card.galleryItem.product.id)
+                      }}
+                    >
+                      Show Original Image
+                    </button>
+                  )}
                 </div>
               </div>
             )
@@ -959,10 +1264,11 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                 top: visibleY,
                 width: card.width,
                 height: card.height,
-                opacity: finalOpacity,
+                opacity: card.opacity,
                 transform: `translate(-50%, 0) scale(${draggingCardId === card.id ? 1.05 : card.isHovered ? 1.02 : card.scale})`,
                 zIndex: draggingCardId === card.id ? 100 : undefined,
                 cursor: draggingCardId === card.id ? 'grabbing' : 'grab',
+                ...maskStyle,
               }}
               onMouseEnter={() => handleCardMouseEnter(card.id)}
               onMouseLeave={() => handleCardMouseLeave(card.id)}
@@ -971,21 +1277,49 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
               onMouseDown={e => handleDragStart(card.id, e)}
               onClick={e => handleCardClick(card, e)}
             >
+              {/* Scene image with product */}
               <img
                 src={card.galleryItem.sceneUrl}
                 alt=""
-                className="gallery-card-image"
+                className={`gallery-card-image ${removedProductCardIds.has(card.id) ? 'product-removed' : ''}`}
                 loading="lazy"
                 draggable={false}
               />
+              {/* Base layer: shown when product is removed (crossfade) */}
+              {removedProductCardIds.has(card.id) && (
+                <img
+                  src={card.galleryItem.baseUrl}
+                  alt=""
+                  className="gallery-card-image gallery-card-base-revealed"
+                  loading="lazy"
+                  draggable={false}
+                />
+              )}
               {/* Product highlight overlay - only visible when hovering over product area */}
-              {productHoverCardId === card.id && highlightDataUrlRefs.current.get(card.id) && (
+              {!removedProductCardIds.has(card.id) && productHoverCardId === card.id && highlightDataUrlRefs.current.get(card.id) && (
                 <img
                   src={highlightDataUrlRefs.current.get(card.id)}
                   alt=""
                   className="product-highlight-overlay"
                 />
               )}
+              {/* Show Original Image button - shows when product is removed */}
+              {removedProductCardIds.has(card.id) && (
+                <button
+                  className="revert-button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleRevertProduct(card.id, card.galleryItem.product.id)
+                  }}
+                >
+                  Show Original Image
+                </button>
+              )}
+              {/* Resize handle - bottom right corner */}
+              <div
+                className={clsx('resize-handle', resizingCardId === card.id && 'resizing')}
+                onMouseDown={e => handleResizeStart(card.id, e)}
+              />
             </div>
           )
         })}
@@ -1030,9 +1364,14 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
         <ProductOverlay
           product={activeProduct.product}
           position={activeProduct.position}
-          onAddToBag={() => handleAddToBag(activeProduct.product)}
-          onBuyNow={() => handleBuyNow(activeProduct.product)}
-          onClose={() => setActiveProduct(null)}
+          productBounds={activeProduct.productBounds}
+          sceneImageUrl={activeProduct.sceneImageUrl}
+          onAddToBag={() => handleAddToBag(activeProduct.product, activeProduct.cardId)}
+          onBuyNow={handleBuyNow}
+          onClose={() => {
+            setActiveProduct(null)
+            setProductClickLocked(false)
+          }}
         />
       )}
 
@@ -1044,8 +1383,8 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
           onRemove={handleRemoveFromBag}
           onUpdateQuantity={handleUpdateQuantity}
           onCheckout={() => {
-            setShowBag(false)
-            setShowPayment(true)
+            // Clear the bag - checkout handled internally by ShoppingBag
+            setBag([])
           }}
           total={bagTotal}
         />

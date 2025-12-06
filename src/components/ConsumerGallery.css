@@ -47,7 +47,9 @@
   background: linear-gradient(
     to bottom,
     rgba(26, 24, 21, 1) 0%,
-    rgba(26, 24, 21, 0.8) 40%,
+    rgba(26, 24, 21, 0.95) 10%,
+    rgba(26, 24, 21, 0.7) 30%,
+    rgba(26, 24, 21, 0.3) 60%,
     rgba(26, 24, 21, 0) 100%
   );
 }
@@ -57,7 +59,9 @@
   background: linear-gradient(
     to top,
     rgba(26, 24, 21, 1) 0%,
-    rgba(26, 24, 21, 0.8) 40%,
+    rgba(26, 24, 21, 0.95) 10%,
+    rgba(26, 24, 21, 0.7) 30%,
+    rgba(26, 24, 21, 0.3) 60%,
     rgba(26, 24, 21, 0) 100%
   );
 }
@@ -118,6 +122,25 @@
   display: block;
 }
 
+/* Product removal crossfade */
+.gallery-card-image.product-removed {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.gallery-card-base-revealed {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  object-fit: cover;
+  animation: fadeInBase 0.5s ease forwards;
+}
+
+@keyframes fadeInBase {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Expanded Card Overlay */
 .expanded-card-overlay {
   position: fixed;
@@ -162,6 +185,20 @@
   object-fit: contain;
   border-radius: 16px;
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+}
+
+/* Product removal crossfade for expanded view */
+.expanded-card-image.product-removed {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.expanded-card-base-revealed {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  object-fit: contain;
+  animation: fadeInBase 0.5s ease forwards;
 }
 
 /* Highlight overlay for expanded view - mask-based product tint */
@@ -330,4 +367,107 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+}
+
+/* Flying Product Animation - sucks product into bag */
+.flying-product {
+  position: fixed;
+  z-index: 600;
+  pointer-events: none;
+  animation: flyToBag 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.flying-product img {
+  width: var(--start-width);
+  height: var(--start-height);
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes flyToBag {
+  0% {
+    left: var(--start-x);
+    top: var(--start-y);
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    left: var(--end-x);
+    top: var(--end-y);
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0.3;
+    filter: blur(4px);
+  }
+}
+
+/* Revert Button */
+.revert-button {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.65rem;
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease, background 0.2s ease;
+  z-index: 5;
+}
+
+.expanded-card:hover .revert-button,
+.gallery-card:hover .revert-button {
+  opacity: 1;
+}
+
+.revert-button:hover {
+  background: rgba(201, 162, 39, 0.4);
+  color: #fff;
+}
+
+/* Resize Handle */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.resize-handle::before {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 0 0 4px 0;
+}
+
+.gallery-card:hover .resize-handle {
+  opacity: 1;
+}
+
+.resize-handle:hover::before,
+.resize-handle.resizing::before {
+  border-color: rgba(201, 162, 39, 0.8);
+}
+
+.gallery-card.dragging .resize-handle {
+  opacity: 0;
+  pointer-events: none;
 }
