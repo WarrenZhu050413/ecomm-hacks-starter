@@ -14,7 +14,9 @@ Studio Tenwu
 - Matt Kotzbauer
 
 ### Demo
-- **Live URL:** (TODO)
+- **Live URL:**
+    - Advertiser Console: https://ecomm-hacks-starter.vercel.app/advertiser
+    - Consumer Network: https://ecomm-hacks-starter.vercel.app/consumer
 - **Demo Video:** N/A
 
 ### What We Built
