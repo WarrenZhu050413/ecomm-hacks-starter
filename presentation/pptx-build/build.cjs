@@ -293,7 +293,7 @@ function createSlides() {
 
 // Build presentation
 async function buildPresentation() {
-  console.log('Building Ephemeral Ads presentation...\n');
+  console.log('Building Reverie presentation...\n');
 
   // Step 1: Create background
   await createBackground();
@@ -304,7 +304,7 @@ async function buildPresentation() {
   // Step 3: Convert to PowerPoint
   const pptx = new pptxgen();
   pptx.layout = 'LAYOUT_16x9';
-  pptx.title = 'Ephemeral Ads';
+  pptx.title = 'Reverie';
   pptx.author = 'Warren Zhu & Matthew Kotzbauer';
   pptx.subject = 'Invisible commerce for the visual web';
 
@@ -314,7 +314,7 @@ async function buildPresentation() {
   }
 
   // Save
-  const outputPath = path.join(WORK_DIR, '..', 'Ephemeral-Ads.pptx');
+  const outputPath = path.join(WORK_DIR, '..', 'Reverie.pptx');
   await pptx.writeFile({ fileName: outputPath });
   console.log(`\nPresentation saved to: ${outputPath}`);
 

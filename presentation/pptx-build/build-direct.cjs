@@ -17,11 +17,11 @@ const COLORS = {
 };
 
 async function buildPresentation() {
-  console.log('Building Ephemeral Ads presentation...\n');
+  console.log('Building Reverie presentation...\n');
 
   const pptx = new pptxgen();
   pptx.layout = 'LAYOUT_16x9';
-  pptx.title = 'Ephemeral Ads';
+  pptx.title = 'Reverie';
   pptx.author = 'Warren Zhu & Matthew Kotzbauer';
   pptx.subject = 'Invisible commerce for the visual web';
 
@@ -220,7 +220,7 @@ async function buildPresentation() {
   addSlideNum(slide6, 6);
 
   // ===== SAVE =====
-  const outputPath = path.join(__dirname, '..', 'Ephemeral-Ads.pptx');
+  const outputPath = path.join(__dirname, '..', 'Reverie.pptx');
   await pptx.writeFile({ fileName: outputPath });
   console.log(`\nPresentation saved to: ${outputPath}`);
 
