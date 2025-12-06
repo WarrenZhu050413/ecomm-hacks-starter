@@ -1,0 +1,56 @@
+{
+  "name": "Creative Canvas",
+  "cardSchema": {
+    "fields": [
+      {"name": "category", "type": "string?", "display": "meta"},
+      {"name": "content", "type": "string", "display": "primary"},
+      {"name": "note", "type": "string?", "display": "secondary"}
+    ]
+  },
+  "cardTheme": {
+    "container": "bg-black/30 backdrop-blur-md rounded-xl border border-white/10",
+    "primary": "text-lg text-white leading-relaxed text-center",
+    "secondary": "text-base text-white/80 italic text-center mt-2",
+    "meta": "text-sm text-white/70 text-center mt-1",
+    "dragging": "opacity-80 scale-105 rotate-1"
+  },
+  "canvasTheme": {
+    "background": "linear-gradient(160deg, #0a0a12 0%, #12121f 40%, #0a0a14 100%)",
+    "accent": "#fbbf24"
+  },
+  "generationContext": "Generate creative content that inspires and engages. Focus on variety, depth, and unexpected connections.",
+  "directives": [
+    "Explore something unexpected",
+    "Go deeper into existing themes",
+    "Introduce an opposing perspective",
+    "Focus on vivid concrete details",
+    "Draw from a different domain"
+  ],
+  "seedContent": [
+    {"category": "Idea", "content": "What if constraints were the seed of creativity?", "note": "Limitations often spark innovation"},
+    {"category": "Question", "content": "Where does inspiration find you?", "note": null},
+    {"category": "Observation", "content": "The best ideas often come from unlikely combinations", "note": "Cross-pollination works"},
+    {"category": "Prompt", "content": "Start before you're ready", "note": "Perfectionism is the enemy of progress"}
+  ],
+  "physics": {
+    "cardLifetime": 45,
+    "driftSpeed": 1.0,
+    "jiggle": 1.0,
+    "bounce": 0.5
+  },
+  "models": {
+    "generation": "flash",
+    "chat": "flash",
+    "onboarding": "pro"
+  },
+  "spawning": {
+    "intervalSeconds": 12,
+    "minCards": 4,
+    "imageWeight": 0.0
+  },
+  "writingPane": {
+    "title": "Your Space",
+    "placeholder": "Start writing...",
+    "initialContent": "# Writing\n\n\n\n# Generation Guidelines"
+  }
+}

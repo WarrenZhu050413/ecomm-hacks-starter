@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Background Techniques - Prototype</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav h1 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      color: #888;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .nav-links a {
+      padding: 0.4rem 0.8rem;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-links a.active {
+      background: #6366f1;
+    }
+
+    /* Image selector */
+    .image-selector {
+      margin-top: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .image-selector label {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .image-selector input {
+      flex: 1;
+      max-width: 400px;
+      padding: 0.4rem 0.8rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: #fff;
+      font-size: 0.85rem;
+    }
+
+    .image-selector button {
+      padding: 0.4rem 1rem;
+      background: #6366f1;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .image-selector button:hover {
+      background: #5558e3;
+    }
+
+    /* Content */
+    .content {
+      padding-top: 140px;
+    }
+
+    /* Technique Section */
+    .technique {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .technique-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .technique-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .technique-info {
+      position: relative;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 1rem;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .technique-info h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .technique-info .number {
+      color: #6366f1;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .technique-info p {
+      color: #aaa;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .technique-info code {
+      display: block;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+      text-align: left;
+      color: #6ee7b7;
+      overflow-x: auto;
+    }
+
+    /* Technique-specific filters */
+
+    /* 1. Blur + Darken */
+    #blur-darken .technique-bg img {
+      filter: blur(8px) brightness(0.4);
+      transform: scale(1.1);
+    }
+
+    /* 2. Grayscale */
+    #grayscale .technique-bg img {
+      filter: grayscale(100%) brightness(0.5);
+    }
+
+    /* 3. Sepia */
+    #sepia .technique-bg img {
+      filter: sepia(80%) brightness(0.5) saturate(1.2);
+    }
+
+    /* 4. Duotone (via hue-rotate + saturate) */
+    #duotone .technique-bg img {
+      filter: grayscale(100%) brightness(0.6) sepia(100%) hue-rotate(180deg) saturate(2);
+    }
+
+    /* 5. Vignette (overlay) */
+    #vignette .technique-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.8) 100%);
+    }
+    #vignette .technique-bg img {
+      filter: brightness(0.6);
+    }
+
+    /* 6. Color Overlay with Blend Mode */
+    #color-overlay .technique-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #1e1b4b, #4c1d95);
+      mix-blend-mode: multiply;
+    }
+    #color-overlay .technique-bg img {
+      filter: brightness(0.8) contrast(1.1);
+    }
+
+    /* 7. High Contrast */
+    #high-contrast .technique-bg img {
+      filter: contrast(1.5) brightness(0.5) saturate(0.8);
+    }
+
+    /* 8. Desaturate + Tint (overlay color) */
+    #desaturate-tint .technique-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(99, 102, 241, 0.3);
+      mix-blend-mode: color;
+    }
+    #desaturate-tint .technique-bg img {
+      filter: saturate(0.3) brightness(0.5);
+    }
+
+    /* 9. Gradient Overlay */
+    #gradient-overlay .technique-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg,
+        rgba(0,0,0,0.8) 0%,
+        rgba(0,0,0,0.2) 40%,
+        rgba(0,0,0,0.2) 60%,
+        rgba(0,0,0,0.9) 100%);
+    }
+    #gradient-overlay .technique-bg img {
+      filter: brightness(0.7);
+    }
+
+    /* 10. Noise/Grain Texture */
+    #noise-grain .technique-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.15;
+      mix-blend-mode: overlay;
+    }
+    #noise-grain .technique-bg img {
+      filter: brightness(0.5) contrast(1.1);
+    }
+
+    /* Sample cards floating on backgrounds */
+    .sample-card {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 1.5rem;
+      border-radius: 1rem;
+      max-width: 280px;
+      color: #fff;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .sample-card.top-left { top: 20%; left: 10%; }
+    .sample-card.top-right { top: 15%; right: 10%; }
+    .sample-card.bottom-left { bottom: 20%; left: 15%; }
+    .sample-card.bottom-right { bottom: 25%; right: 12%; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <h1>Image Background Processing Techniques</h1>
+    <div class="nav-links">
+      <a href="#blur-darken">1. Blur+Darken</a>
+      <a href="#grayscale">2. Grayscale</a>
+      <a href="#sepia">3. Sepia</a>
+      <a href="#duotone">4. Duotone</a>
+      <a href="#vignette">5. Vignette</a>
+      <a href="#color-overlay">6. Color Overlay</a>
+      <a href="#high-contrast">7. High Contrast</a>
+      <a href="#desaturate-tint">8. Desaturate+Tint</a>
+      <a href="#gradient-overlay">9. Gradient Overlay</a>
+      <a href="#noise-grain">10. Noise/Grain</a>
+    </div>
+    <div class="image-selector">
+      <label>Image URL:</label>
+      <input type="text" id="imageUrl" value="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg">
+      <button onclick="updateImages()">Apply</button>
+      <button onclick="searchWikimedia()">Search Wikimedia</button>
+    </div>
+  </nav>
+
+  <main class="content">
+    <!-- 1. Blur + Darken -->
+    <section id="blur-darken" class="technique">
+      <div class="technique-bg">
+        <img class="bg-image" src="" alt="Background">
+      </div>
+      <div class="sample-card top-right">
+        "The quietest places often hold the loudest thoughts."
+      </div>
+      <div class="technique-info">
+        <div class="number">Technique 1 of 10</div>
+        <h2>Blur + Darken</h2>
+        <p>Gaussian blur removes detail while darkening creates depth. Perfect for text-heavy UIs where background shouldn't compete for attention.</p>
+        <code>filter: blur(8px) brightness(0.4);<br>transform: scale(1.1); /* hide blur edges */</code>
+      </div>
+    </section>
+
+    <!-- 2. Grayscale -->
+    <section id="grayscale" class="technique">
+      <div class="technique-bg">
+        <img class="bg-image" src="" alt="Background">
+      </div>
+      <div class="sample-card bottom-left">
+        "In monochrome, we find focus."
+      </div>
+      <div class="technique-info">
+        <div class="number">Technique 2 of 10</div>
+        <h2>Grayscale</h2>
+        <p>Removes color entirely, creating a timeless, serious mood. Works well with accent colors in the UI that pop against the gray.</p>
+        <code>filter: grayscale(100%) brightness(0.5);</code>
+      </div>
+    </section>
+
+    <!-- 3. Sepia -->
+    <section id="sepia" class="technique">
+      <div class="technique-bg">
+        <img class="bg-image" src="" alt="Background">
+      </div>
+      <div class="sample-card top-left">
+        "Nostalgia is a warm filter on cold memories."
+      </div>
+      <div class="technique-info">
+        <div class="number">Technique 3 of 10</div>
+        <h2>Sepia</h2>
+        <p>Warm, nostalgic tones reminiscent of old photographs. Creates a sense of history and warmth. Pair with amber accents.</p>
+        <code>filter: sepia(80%) brightness(0.5) saturate(1.2);</code>
+      </div>
+    </section>
+
+    <!-- 4. Duotone -->
+    <section id="duotone" class="technique">
+      <div class="technique-bg">
+        <img class="bg-image" src="" alt="Background">
+      </div>
+      <div class="sample-card bottom-right">
+        "Two colors tell a thousand stories."
+      </div>
+      <div class="technique-info">
+        <div class="number">Technique 4 of 10</div>
+        <h2>Duotone</h2>
+        <p>Maps image to two colors, creating a bold, graphic look. Popular in modern design. Adjust hue-rotate for different color schemes.</p>
+        <code>filter: grayscale(100%) brightness(0.6)<br>  sepia(100%) hue-rotate(180deg) saturate(2);</code>
+      </div>
+    </section>
+
+    <!-- 5. Vignette -->
+    <section id="vignette" class="technique">
+      <div class="technique-bg">
+        <img class="bg-image" src="" alt="Background">
+      </div>
+      <div class="sample-card top-right">
+        "Focus draws the eye to what matters."
+      </div>
+      <div class="technique-info">
+        <div class="number">Technique 5 of 10</div>
+        <h2>Vignette</h2>
+        <p>Darkens edges to draw attention to the center. Classic photography technique that creates depth and focus.</p>
+        <code>::after {<br>  background: radial-gradient(ellipse at center,<br>    transparent 20%, rgba(0,0,0,0.8) 100%);<br>}</code>
+      </div>
+    </section>
+
+    <!-- 6. Color Overlay -->
+    <section id="color-overlay" class="technique">
+      <div class="technique-bg">
+        <img class="bg-image" src="" alt="Background">
+      </div>
+      <div class="sample-card bottom-left">
+        "Brand colors unify the experience."
+      </div>
+      <div class="technique-info">
+        <div class="number">Technique 6 of 10</div>
+        <h2>Color Overlay with Blend Mode</h2>
+        <p>Applies brand colors using CSS blend modes. Multiply darkens while preserving luminosity. Great for brand consistency.</p>
+        <code>::after {<br>  background: linear-gradient(135deg, #1e1b4b, #4c1d95);<br>  mix-blend-mode: multiply;<br>}</code>
+      </div>
+    </section>
+
+    <!-- 7. High Contrast -->
+    <section id="high-contrast" class="technique">
+      <div class="technique-bg">
+        <img class="bg-image" src="" alt="Background">
+      </div>
+      <div class="sample-card top-left">
+        "Contrast reveals what subtlety hides."
+      </div>
+      <div class="technique-info">
+        <div class="number">Technique 7 of 10</div>
+        <h2>High Contrast</h2>
+        <p>Amplifies the difference between light and dark areas. Creates drama and visual impact. Use sparingly.</p>
+        <code>filter: contrast(1.5) brightness(0.5) saturate(0.8);</code>
+      </div>
+    </section>
+
+    <!-- 8. Desaturate + Tint -->
+    <section id="desaturate-tint" class="technique">
+      <div class="technique-bg">
+        <img class="bg-image" src="" alt="Background">
+      </div>
+      <div class="sample-card bottom-right">
+        "A whisper of color speaks volumes."
+      </div>
+      <div class="technique-info">
+        <div class="number">Technique 8 of 10</div>
+        <h2>Desaturate + Tint</h2>
+        <p>Reduces saturation then adds a subtle color cast. More nuanced than full grayscale, maintains some warmth.</p>
+        <code>img { filter: saturate(0.3) brightness(0.5); }<br>::after {<br>  background: rgba(99, 102, 241, 0.3);<br>  mix-blend-mode: color;<br>}</code>
+      </div>
+    </section>
+
+    <!-- 9. Gradient Overlay -->
+    <section id="gradient-overlay" class="technique">
+      <div class="technique-bg">
+        <img class="bg-image" src="" alt="Background">
+      </div>
+      <div class="sample-card top-right">
+        "Layers of darkness frame the light."
+      </div>
+      <div class="technique-info">
+        <div class="number">Technique 9 of 10</div>
+        <h2>Gradient Overlay</h2>
+        <p>Multi-stop gradient creates areas of varying darkness. Perfect for placing UI elements in darker zones while keeping image visible.</p>
+        <code>::after {<br>  background: linear-gradient(180deg,<br>    rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 40%,<br>    rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.9) 100%);<br>}</code>
+      </div>
+    </section>
+
+    <!-- 10. Noise/Grain -->
+    <section id="noise-grain" class="technique">
+      <div class="technique-bg">
+        <img class="bg-image" src="" alt="Background">
+      </div>
+      <div class="sample-card bottom-left">
+        "Imperfection adds character."
+      </div>
+      <div class="technique-info">
+        <div class="number">Technique 10 of 10</div>
+        <h2>Noise/Grain Texture</h2>
+        <p>Adds film-like grain using SVG noise. Creates organic, tactile feel. Reduces the "digital" look of processed images.</p>
+        <code>::after {<br>  background-image: url("data:image/svg+xml,...");<br>  opacity: 0.15;<br>  mix-blend-mode: overlay;<br>}</code>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Default image
+    const defaultImage = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg';
+
+    // Update all background images
+    function updateImages() {
+      const url = document.getElementById('imageUrl').value || defaultImage;
+      document.querySelectorAll('.bg-image').forEach(img => {
+        img.src = url;
+      });
+    }
+
+    // Search Wikimedia (opens prompt)
+    function searchWikimedia() {
+      const query = prompt('Enter search query (e.g., "sunset ocean", "forest mist", "cityscape night"):');
+      if (query) {
+        // Use the wikimedia search script via fetch to local API
+        alert(`To search Wikimedia, run:\npython3 backend/app/tools/wikimedia_search.py "${query}" --json\n\nThen paste the direct_url here.`);
+      }
+    }
+
+    // Highlight active nav link on scroll
+    const sections = document.querySelectorAll('.technique');
+    const navLinks = document.querySelectorAll('.nav-links a');
+
+    function updateActiveLink() {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 200;
+        if (scrollY >= sectionTop) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', updateActiveLink);
+
+    // Initialize images on load
+    updateImages();
+  </script>
+</body>
+</html>

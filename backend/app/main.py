@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import chat, image, media
+from app.routers import chat, image, media, onboard, generate, style, images
 from app.services.gemini import GeminiService
 
 # Load environment variables
@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
     if not api_key:
         logger.warning("GEMINI_API_KEY not set - API calls will fail")
 
-    default_model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+    default_model = os.environ.get("GEMINI_MODEL", "gemini-3-pro-preview")
 
     try:
         app.state.gemini_service = GeminiService(api_key=api_key, default_model=default_model)
@@ -79,6 +79,12 @@ app.include_router(chat.router)
 app.include_router(image.router)
 app.include_router(media.router)
 
+# Ephemeral canvas routers
+app.include_router(onboard.router)
+app.include_router(generate.router)
+app.include_router(style.router)
+app.include_router(images.router)
+
 
 @app.get("/")
 async def root():
@@ -87,6 +93,7 @@ async def root():
         "name": "Gemini Backend API",
         "version": "0.1.0",
         "endpoints": {
+            # Core Gemini endpoints
             "chat_completions": "POST /api/chat/completions",
             "simple_query": "POST /api/chat/query",
             "list_chat_models": "GET /api/chat/models",
@@ -95,6 +102,12 @@ async def root():
             "list_image_models": "GET /api/image/models",
             "multimedia_query": "POST /api/media/query",
             "list_media_types": "GET /api/media/supported-types",
+            # Ephemeral canvas endpoints
+            "onboard": "POST /api/onboard",
+            "generate": "POST /api/generate",
+            "style": "POST /api/style",
+            "images_search": "GET /api/images/search",
+            "images_random": "GET /api/images/random",
             "health": "GET /health",
         },
     }

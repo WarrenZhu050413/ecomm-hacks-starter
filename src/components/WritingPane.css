@@ -1,0 +1,310 @@
+/* WritingPane.css - Elegant writing pane styling */
+
+.writing-pane {
+  /* Default values (overridden by CSS custom properties from props) */
+  --accent-color: #fbbf24;
+  --pane-background: rgba(0, 0, 0, 0.5);
+  --pane-text-color: rgba(255, 255, 255, 0.9);
+  --pane-title-color: color-mix(in srgb, var(--accent-color) 60%, white);
+  --pane-font-family: 'Georgia', 'Times New Roman', serif;
+
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-width: 60%;
+  height: 100%;
+  padding: 1.5rem 2rem;
+  background: var(--pane-background);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Subtle accent glow at top */
+.writing-pane::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--accent-color) 30%, transparent) 50%,
+    transparent 100%
+  );
+}
+
+.writing-pane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.writing-pane-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--pane-title-color);
+  opacity: 0.7;
+}
+
+/* Editor Toolbar */
+.writing-pane-toolbar {
+  display: flex;
+  gap: 2px;
+}
+
+.writing-pane-toolbar button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.1s ease;
+}
+
+.writing-pane-toolbar button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.writing-pane-toolbar button.is-active {
+  background: var(--accent-color);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.writing-area {
+  flex: 1;
+  width: 100%;
+  overflow-y: auto;
+}
+
+/* TipTap editor styling */
+.writing-editor {
+  min-height: 100%;
+  color: var(--pane-text-color);
+  font-family: var(--pane-font-family);
+  font-size: 1.125rem;
+  line-height: 1.8;
+  outline: none;
+}
+
+.writing-editor:focus {
+  outline: none;
+}
+
+/* Paragraph spacing */
+.writing-editor p {
+  margin: 0 0 0.75em 0;
+}
+
+/* Headings */
+.writing-editor h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 1.5em 0 0.5em 0;
+  color: var(--pane-text-color);
+}
+
+.writing-editor h2 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 1.25em 0 0.4em 0;
+  color: var(--pane-text-color);
+}
+
+.writing-editor h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 1em 0 0.3em 0;
+  color: var(--pane-text-color);
+}
+
+/* Bold & Italic */
+.writing-editor strong {
+  font-weight: 600;
+}
+
+.writing-editor em {
+  font-style: italic;
+}
+
+/* Lists */
+.writing-editor ul,
+.writing-editor ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.writing-editor li {
+  margin: 0.25em 0;
+}
+
+/* Blockquote */
+.writing-editor blockquote {
+  border-left: 3px solid var(--accent-color);
+  margin: 1em 0;
+  padding-left: 1em;
+  opacity: 0.85;
+  font-style: italic;
+}
+
+/* Code */
+.writing-editor code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.9em;
+}
+
+.writing-editor pre {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1em;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.writing-editor pre code {
+  background: none;
+  padding: 0;
+}
+
+/* Links */
+.editor-link {
+  color: var(--accent-color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Placeholder */
+.writing-editor p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: rgba(255, 255, 255, 0.25);
+  font-style: italic;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Bubble Menu (floating toolbar) */
+.bubble-menu {
+  display: flex;
+  background: rgba(20, 20, 20, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 4px;
+  gap: 2px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.bubble-menu button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.1s ease;
+}
+
+.bubble-menu button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.bubble-menu button.is-active {
+  background: var(--accent-color);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+/* Custom scrollbar for the textarea */
+.writing-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.writing-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.writing-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.writing-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.writing-pane-hint {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  font-style: italic;
+}
+
+/* Resize Divider */
+.resize-divider {
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.resize-divider::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: 0;
+  bottom: 0;
+}
+
+.resize-divider:hover {
+  background: rgba(251, 191, 36, 0.3);
+}
+
+.resize-divider.dragging {
+  background: rgba(251, 191, 36, 0.5);
+}
+
+/* Visual indicator in the center of the divider */
+.resize-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1px;
+  transition:
+    background 0.15s ease,
+    height 0.15s ease;
+}
+
+.resize-divider:hover::after,
+.resize-divider.dragging::after {
+  background: rgba(251, 191, 36, 0.6);
+  height: 60px;
+}

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow Wizard - Advertiser Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(160deg, #0a0a12 0%, #12121f 40%, #0a0a14 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .step-content {
+            opacity: 0;
+            transform: translateX(20px);
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .step-content.slide-out {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+        }
+
+        .btn-glow {
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .progress-dot {
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background: #fbbf24;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+        }
+
+        .progress-dot.completed {
+            background: #10b981;
+        }
+
+        .pill-toggle {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pill-toggle:hover {
+            border-color: rgba(251, 191, 36, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .pill-toggle.selected {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .slider-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .slider-thumb {
+            width: 20px;
+            height: 20px;
+            background: #fbbf24;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #fbbf24;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
+
+        input[type="range"]::-moz-range-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #fbbf24;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+            border: none;
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .celebrate {
+            animation: celebrate 0.6s ease-out;
+        }
+
+        @keyframes celebrate {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .product-upload {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .product-upload:hover {
+            border-color: rgba(251, 191, 36, 0.5);
+            background: rgba(251, 191, 36, 0.05);
+        }
+
+        .product-preview {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .product-preview img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .product-preview .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .product-preview:hover .remove-btn {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-2xl mx-auto">
+        <!-- Progress Indicator -->
+        <div class="mb-12 flex items-center justify-center gap-3">
+            <div class="progress-dot w-3 h-3 rounded-full bg-white/20" data-step="0"></div>
+            <div class="progress-dot w-3 h-3 rounded-full bg-white/20" data-step="1"></div>
+            <div class="progress-dot w-3 h-3 rounded-full bg-white/20" data-step="2"></div>
+            <div class="progress-dot w-3 h-3 rounded-full bg-white/20" data-step="3"></div>
+            <div class="progress-dot w-3 h-3 rounded-full bg-white/20" data-step="4"></div>
+            <div class="progress-dot w-3 h-3 rounded-full bg-white/20" data-step="5"></div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="glass-card rounded-2xl p-8 md:p-12 relative overflow-hidden">
+            <!-- Step 0: Welcome -->
+            <div id="step-0" class="step-content">
+                <div class="text-center space-y-6">
+                    <div class="text-6xl mb-4">✨</div>
+                    <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                        Welcome to Flow
+                    </h1>
+                    <p class="text-xl text-gray-300 mb-8">
+                        Let's set up your first campaign in just a few steps
+                    </p>
+                    <p class="text-gray-400">
+                        Place your products seamlessly into AI-generated mood boards<br>
+                        that resonate with your target audience
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 1: Budget -->
+            <div id="step-1" class="step-content hidden">
+                <h2 class="text-3xl font-bold text-white mb-2">Set Your Budget</h2>
+                <p class="text-gray-400 mb-8">How much would you like to invest?</p>
+
+                <div class="space-y-8">
+                    <div>
+                        <label class="text-white text-sm font-medium mb-3 block">Daily Budget</label>
+                        <input type="range" id="daily-budget" min="10" max="1000" value="100" step="10" class="w-full mb-3">
+                        <div class="text-center">
+                            <span class="text-3xl font-bold text-amber-400">$<span id="daily-budget-value">100</span></span>
+                            <span class="text-gray-400 ml-2">per day</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-white text-sm font-medium mb-3 block">Total Campaign Budget</label>
+                        <input type="range" id="total-budget" min="100" max="10000" value="1000" step="100" class="w-full mb-3">
+                        <div class="text-center">
+                            <span class="text-3xl font-bold text-amber-400">$<span id="total-budget-value">1,000</span></span>
+                            <span class="text-gray-400 ml-2">total</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-4 border border-amber-500/20">
+                        <p class="text-sm text-gray-300">
+                            <span class="text-amber-400 font-semibold">Estimated Reach:</span>
+                            <span id="estimated-reach" class="ml-2">~100,000 impressions</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Audience -->
+            <div id="step-2" class="step-content hidden">
+                <h2 class="text-3xl font-bold text-white mb-2">Target Audience</h2>
+                <p class="text-gray-400 mb-8">Who do you want to reach?</p>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-white text-sm font-medium mb-3 block">Age Range</label>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="age" data-value="18-24">18-24</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="age" data-value="25-34">25-34</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="age" data-value="35-44">35-44</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="age" data-value="45-54">45-54</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="age" data-value="55+">55+</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-white text-sm font-medium mb-3 block">Gender</label>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="gender" data-value="all">All</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="gender" data-value="female">Female</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="gender" data-value="male">Male</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="gender" data-value="non-binary">Non-binary</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-white text-sm font-medium mb-3 block">Interests</label>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="interests" data-value="fashion">Fashion</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="interests" data-value="beauty">Beauty</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="interests" data-value="home-decor">Home Decor</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="interests" data-value="technology">Technology</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="interests" data-value="wellness">Wellness</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="interests" data-value="fitness">Fitness</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="interests" data-value="food">Food</div>
+                            <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="interests" data-value="travel">Travel</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Aesthetic -->
+            <div id="step-3" class="step-content hidden">
+                <h2 class="text-3xl font-bold text-white mb-2">Choose Your Vibe</h2>
+                <p class="text-gray-400 mb-8">What aesthetics match your brand?</p>
+
+                <div class="space-y-4">
+                    <div class="flex flex-wrap gap-3">
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="minimalist">Minimalist</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="luxury">Luxury</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="bohemian">Bohemian</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="industrial">Industrial</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="cozy">Cozy</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="modern">Modern</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="vintage">Vintage</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="scandinavian">Scandinavian</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="eclectic">Eclectic</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="dark-moody">Dark & Moody</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="bright-airy">Bright & Airy</div>
+                        <div class="pill-toggle px-4 py-2 rounded-full border border-white/20 text-gray-300" data-group="aesthetic" data-value="rustic">Rustic</div>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-4 border border-white/10 mt-6">
+                        <p class="text-sm text-gray-400">
+                            💡 <span class="text-gray-300">Your products will be placed in mood boards that match these aesthetics</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Products -->
+            <div id="step-4" class="step-content hidden">
+                <h2 class="text-3xl font-bold text-white mb-2">Add Products</h2>
+                <p class="text-gray-400 mb-8">Upload or select products to feature</p>
+
+                <div class="space-y-6">
+                    <div class="product-upload rounded-xl p-8 text-center cursor-pointer" id="upload-area">
+                        <div class="text-4xl mb-3">📦</div>
+                        <p class="text-white font-medium mb-1">Click to upload product images</p>
+                        <p class="text-sm text-gray-400">or drag and drop here</p>
+                        <input type="file" id="file-input" class="hidden" accept="image/*" multiple>
+                    </div>
+
+                    <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4 hidden">
+                        <!-- Products will be added here -->
+                    </div>
+
+                    <div class="glass-card rounded-xl p-4 border border-white/10">
+                        <p class="text-sm text-gray-400">
+                            <span class="text-amber-400 font-semibold">Selected:</span>
+                            <span id="product-count" class="ml-2 text-white">0 products</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Review -->
+            <div id="step-5" class="step-content hidden">
+                <h2 class="text-3xl font-bold text-white mb-2">Review & Launch</h2>
+                <p class="text-gray-400 mb-8">Everything looks good?</p>
+
+                <div class="space-y-4">
+                    <div class="glass-card rounded-xl p-4 border border-white/10">
+                        <h3 class="text-white font-semibold mb-2">Budget</h3>
+                        <p class="text-gray-300 text-sm">Daily: $<span id="review-daily-budget">100</span></p>
+                        <p class="text-gray-300 text-sm">Total: $<span id="review-total-budget">1,000</span></p>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-4 border border-white/10">
+                        <h3 class="text-white font-semibold mb-2">Audience</h3>
+                        <div class="space-y-1 text-sm">
+                            <p class="text-gray-300">Age: <span id="review-age" class="text-white">-</span></p>
+                            <p class="text-gray-300">Gender: <span id="review-gender" class="text-white">-</span></p>
+                            <p class="text-gray-300">Interests: <span id="review-interests" class="text-white">-</span></p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-4 border border-white/10">
+                        <h3 class="text-white font-semibold mb-2">Aesthetics</h3>
+                        <p class="text-gray-300 text-sm" id="review-aesthetic">-</p>
+                    </div>
+
+                    <div class="glass-card rounded-xl p-4 border border-white/10">
+                        <h3 class="text-white font-semibold mb-2">Products</h3>
+                        <p class="text-gray-300 text-sm"><span id="review-products">0</span> products selected</p>
+                    </div>
+
+                    <div id="success-message" class="hidden glass-card rounded-xl p-6 border border-green-500/30 bg-green-500/10 text-center celebrate">
+                        <div class="text-5xl mb-3">🎉</div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Campaign Launched!</h3>
+                        <p class="text-gray-300">Your products are now being placed into beautiful mood boards</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-12 pt-8 border-t border-white/10">
+                <button id="back-btn" class="px-6 py-3 rounded-xl text-gray-400 hover:text-white transition-colors hidden">
+                    ← Back
+                </button>
+                <div class="flex-1"></div>
+                <button id="next-btn" class="btn-glow px-8 py-3 bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-xl transition-all">
+                    Get Started
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        const state = {
+            currentStep: 0,
+            totalSteps: 6,
+            formData: {
+                dailyBudget: 100,
+                totalBudget: 1000,
+                age: [],
+                gender: [],
+                interests: [],
+                aesthetic: [],
+                products: []
+            }
+        };
+
+        // Elements
+        const steps = document.querySelectorAll('[id^="step-"]');
+        const progressDots = document.querySelectorAll('.progress-dot');
+        const backBtn = document.getElementById('back-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const card = document.querySelector('.glass-card');
+
+        // Budget sliders
+        const dailyBudgetSlider = document.getElementById('daily-budget');
+        const totalBudgetSlider = document.getElementById('total-budget');
+        const dailyBudgetValue = document.getElementById('daily-budget-value');
+        const totalBudgetValue = document.getElementById('total-budget-value');
+        const estimatedReach = document.getElementById('estimated-reach');
+
+        // Product upload
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const productGrid = document.getElementById('product-grid');
+        const productCount = document.getElementById('product-count');
+
+        // Initialize
+        updateProgressIndicator();
+        updateButtonText();
+
+        // Budget slider listeners
+        dailyBudgetSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            state.formData.dailyBudget = value;
+            dailyBudgetValue.textContent = value;
+            updateEstimatedReach();
+        });
+
+        totalBudgetSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            state.formData.totalBudget = value;
+            totalBudgetValue.textContent = value.toLocaleString();
+            updateEstimatedReach();
+        });
+
+        function updateEstimatedReach() {
+            const impressions = Math.round(state.formData.totalBudget * 100);
+            estimatedReach.textContent = `~${impressions.toLocaleString()} impressions`;
+        }
+
+        // Pill toggle listeners
+        document.querySelectorAll('.pill-toggle').forEach(pill => {
+            pill.addEventListener('click', () => {
+                const group = pill.dataset.group;
+                const value = pill.dataset.value;
+
+                // For gender, only allow single selection
+                if (group === 'gender') {
+                    document.querySelectorAll(`[data-group="gender"]`).forEach(p => p.classList.remove('selected'));
+                    state.formData.gender = [];
+                }
+
+                pill.classList.toggle('selected');
+
+                const index = state.formData[group].indexOf(value);
+                if (index > -1) {
+                    state.formData[group].splice(index, 1);
+                } else {
+                    state.formData[group].push(value);
+                }
+            });
+        });
+
+        // Product upload
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'rgba(251, 191, 36, 0.5)';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const product = {
+                        id: Date.now() + Math.random(),
+                        url: e.target.result,
+                        name: file.name
+                    };
+                    state.formData.products.push(product);
+                    addProductToGrid(product);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function addProductToGrid(product) {
+            productGrid.classList.remove('hidden');
+
+            const div = document.createElement('div');
+            div.className = 'product-preview';
+            div.dataset.productId = product.id;
+            div.innerHTML = `
+                <img src="${product.url}" alt="${product.name}">
+                <div class="remove-btn" onclick="removeProduct(${product.id})">
+                    <span class="text-white text-sm">✕</span>
+                </div>
+            `;
+            productGrid.appendChild(div);
+
+            productCount.textContent = `${state.formData.products.length} products`;
+        }
+
+        window.removeProduct = function(id) {
+            state.formData.products = state.formData.products.filter(p => p.id !== id);
+            document.querySelector(`[data-product-id="${id}"]`).remove();
+            productCount.textContent = `${state.formData.products.length} products`;
+
+            if (state.formData.products.length === 0) {
+                productGrid.classList.add('hidden');
+            }
+        };
+
+        // Navigation
+        nextBtn.addEventListener('click', () => {
+            if (!validateStep()) {
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 500);
+                return;
+            }
+
+            if (state.currentStep === state.totalSteps - 1) {
+                launchCampaign();
+                return;
+            }
+
+            goToStep(state.currentStep + 1);
+        });
+
+        backBtn.addEventListener('click', () => {
+            if (state.currentStep > 0) {
+                goToStep(state.currentStep - 1);
+            }
+        });
+
+        // Progress dot navigation
+        progressDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                if (index < state.currentStep || index === 0) {
+                    goToStep(index);
+                }
+            });
+        });
+
+        function goToStep(stepNumber) {
+            const currentStepEl = steps[state.currentStep];
+            const nextStepEl = steps[stepNumber];
+
+            currentStepEl.classList.add('slide-out');
+
+            setTimeout(() => {
+                currentStepEl.classList.add('hidden');
+                currentStepEl.classList.remove('slide-out');
+
+                nextStepEl.classList.remove('hidden');
+                state.currentStep = stepNumber;
+
+                updateProgressIndicator();
+                updateButtonText();
+                updateReviewData();
+            }, 300);
+        }
+
+        function updateProgressIndicator() {
+            progressDots.forEach((dot, index) => {
+                dot.classList.remove('active', 'completed');
+                if (index < state.currentStep) {
+                    dot.classList.add('completed');
+                } else if (index === state.currentStep) {
+                    dot.classList.add('active');
+                }
+            });
+        }
+
+        function updateButtonText() {
+            if (state.currentStep === 0) {
+                backBtn.classList.add('hidden');
+                nextBtn.textContent = 'Get Started';
+            } else {
+                backBtn.classList.remove('hidden');
+                if (state.currentStep === state.totalSteps - 1) {
+                    nextBtn.textContent = '🚀 Launch Campaign';
+                } else {
+                    nextBtn.textContent = 'Continue →';
+                }
+            }
+        }
+
+        function validateStep() {
+            switch (state.currentStep) {
+                case 2: // Audience
+                    return state.formData.age.length > 0 &&
+                           state.formData.gender.length > 0 &&
+                           state.formData.interests.length > 0;
+                case 3: // Aesthetic
+                    return state.formData.aesthetic.length > 0;
+                case 4: // Products
+                    return state.formData.products.length > 0;
+                default:
+                    return true;
+            }
+        }
+
+        function updateReviewData() {
+            if (state.currentStep !== 5) return;
+
+            document.getElementById('review-daily-budget').textContent = state.formData.dailyBudget;
+            document.getElementById('review-total-budget').textContent = state.formData.totalBudget.toLocaleString();
+            document.getElementById('review-age').textContent = state.formData.age.join(', ') || '-';
+            document.getElementById('review-gender').textContent = state.formData.gender.join(', ') || '-';
+            document.getElementById('review-interests').textContent = state.formData.interests.join(', ') || '-';
+            document.getElementById('review-aesthetic').textContent = state.formData.aesthetic.join(', ') || '-';
+            document.getElementById('review-products').textContent = state.formData.products.length;
+        }
+
+        function launchCampaign() {
+            const successMsg = document.getElementById('success-message');
+            successMsg.classList.remove('hidden');
+            nextBtn.disabled = true;
+            nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            console.log('Campaign launched with data:', state.formData);
+        }
+    </script>
+</body>
+</html>

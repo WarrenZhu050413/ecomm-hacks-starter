@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advertiser Console - Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(160deg, #0a0a12 0%, #12121f 40%, #0a0a14 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: rgba(251, 191, 36, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: rgba(251, 191, 36, 0.4);
+        }
+
+        .accent-gradient {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        }
+
+        .vibe-tag {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .vibe-tag:hover {
+            background: rgba(251, 191, 36, 0.2);
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+
+        .vibe-tag.active {
+            background: rgba(251, 191, 36, 0.3);
+            border-color: #fbbf24;
+        }
+
+        .product-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            border-color: rgba(251, 191, 36, 0.5);
+            transform: scale(1.05);
+        }
+
+        .upload-zone {
+            background: rgba(251, 191, 36, 0.05);
+            border: 2px dashed rgba(251, 191, 36, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            background: rgba(251, 191, 36, 0.1);
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+
+        .budget-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .budget-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fbbf24;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .budget-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #fbbf24;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .nav-item.active {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border-left: 3px solid #fbbf24;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .chart-bar {
+            background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease;
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- Main Container -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar -->
+        <div class="w-64 glass-panel border-r border-white/10 p-6 flex flex-col">
+            <!-- Brand -->
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold accent-gradient bg-clip-text text-transparent">AdCanvas</h1>
+                <p class="text-xs text-white/40 mt-1">Command Center</p>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1">
+                <div class="nav-item active mb-2">
+                    <svg class="inline w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Dashboard
+                </div>
+                <div class="nav-item mb-2">
+                    <svg class="inline w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                    Analytics
+                </div>
+                <div class="nav-item mb-2">
+                    <svg class="inline w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                    Products
+                </div>
+                <div class="nav-item mb-2">
+                    <svg class="inline w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                    Billing
+                </div>
+                <div class="nav-item">
+                    <svg class="inline w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Settings
+                </div>
+            </nav>
+
+            <!-- Account -->
+            <div class="glass-panel p-3 rounded-lg cursor-pointer hover:bg-white/5">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full accent-gradient flex items-center justify-center font-bold">
+                        B
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <p class="text-sm font-medium">Brand Co.</p>
+                        <p class="text-xs text-white/40">Premium Plan</p>
+                    </div>
+                    <svg class="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto">
+
+            <!-- Header -->
+            <div class="glass-panel border-b border-white/10 p-6 sticky top-0 z-10">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold">Campaign Dashboard</h2>
+                        <p class="text-sm text-white/60 mt-1">Manage your ad placements and budgets</p>
+                    </div>
+                    <button class="px-6 py-3 accent-gradient rounded-lg font-semibold hover:opacity-90 transition">
+                        + New Campaign
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="p-6 space-y-6">
+
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="stat-card rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-white/60 text-sm">Total Impressions</p>
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold">1.2M</p>
+                        <p class="text-xs text-green-400 mt-1">↑ 12.5% from last week</p>
+                    </div>
+
+                    <div class="stat-card rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-white/60 text-sm">Click-Through Rate</p>
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold">3.8%</p>
+                        <p class="text-xs text-green-400 mt-1">↑ 0.4% from last week</p>
+                    </div>
+
+                    <div class="stat-card rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-white/60 text-sm">Conversions</p>
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold">45.6K</p>
+                        <p class="text-xs text-green-400 mt-1">↑ 8.2% from last week</p>
+                    </div>
+
+                    <div class="stat-card rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-white/60 text-sm">Revenue</p>
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-3xl font-bold">$128K</p>
+                        <p class="text-xs text-green-400 mt-1">↑ 15.3% from last week</p>
+                    </div>
+                </div>
+
+                <!-- Budget & Performance Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    <!-- Budget Allocation -->
+                    <div class="lg:col-span-2 glass-panel rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">Budget Allocation</h3>
+
+                        <div class="mb-6">
+                            <div class="flex items-end justify-between mb-2">
+                                <div>
+                                    <p class="text-white/60 text-sm">Monthly Budget</p>
+                                    <p class="text-4xl font-bold mt-1">$<span id="budgetDisplay">50,000</span></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-white/60 text-sm">Spent This Month</p>
+                                    <p class="text-2xl font-semibold text-amber-400 mt-1">$32,450</p>
+                                </div>
+                            </div>
+
+                            <input type="range" min="10000" max="200000" step="1000" value="50000"
+                                   class="budget-slider mt-4" id="budgetSlider">
+
+                            <div class="flex justify-between text-xs text-white/40 mt-2">
+                                <span>$10K</span>
+                                <span>$200K</span>
+                            </div>
+                        </div>
+
+                        <!-- Spending Rate Chart -->
+                        <div class="mt-6">
+                            <p class="text-sm text-white/60 mb-3">Daily Spending Trend (Last 7 Days)</p>
+                            <div class="flex items-end justify-between h-32 gap-2">
+                                <div class="flex-1 flex flex-col justify-end items-center group">
+                                    <div class="chart-bar w-full hover:opacity-80 cursor-pointer" style="height: 65%"></div>
+                                    <p class="text-xs text-white/40 mt-2">Mon</p>
+                                </div>
+                                <div class="flex-1 flex flex-col justify-end items-center group">
+                                    <div class="chart-bar w-full hover:opacity-80 cursor-pointer" style="height: 72%"></div>
+                                    <p class="text-xs text-white/40 mt-2">Tue</p>
+                                </div>
+                                <div class="flex-1 flex flex-col justify-end items-center group">
+                                    <div class="chart-bar w-full hover:opacity-80 cursor-pointer" style="height: 58%"></div>
+                                    <p class="text-xs text-white/40 mt-2">Wed</p>
+                                </div>
+                                <div class="flex-1 flex flex-col justify-end items-center group">
+                                    <div class="chart-bar w-full hover:opacity-80 cursor-pointer" style="height: 85%"></div>
+                                    <p class="text-xs text-white/40 mt-2">Thu</p>
+                                </div>
+                                <div class="flex-1 flex flex-col justify-end items-center group">
+                                    <div class="chart-bar w-full hover:opacity-80 cursor-pointer" style="height: 78%"></div>
+                                    <p class="text-xs text-white/40 mt-2">Fri</p>
+                                </div>
+                                <div class="flex-1 flex flex-col justify-end items-center group">
+                                    <div class="chart-bar w-full hover:opacity-80 cursor-pointer" style="height: 92%"></div>
+                                    <p class="text-xs text-white/40 mt-2">Sat</p>
+                                </div>
+                                <div class="flex-1 flex flex-col justify-end items-center group">
+                                    <div class="chart-bar w-full hover:opacity-80 cursor-pointer" style="height: 100%"></div>
+                                    <p class="text-xs text-white/40 mt-2">Sun</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Score -->
+                    <div class="glass-panel rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">Campaign Performance</h3>
+
+                        <div class="flex items-center justify-center my-8">
+                            <svg class="w-40 h-40">
+                                <circle class="text-white/10" stroke="currentColor" stroke-width="8" fill="transparent" r="60" cx="80" cy="80"/>
+                                <circle class="progress-ring-circle text-amber-400" stroke="currentColor" stroke-width="8" fill="transparent" r="60" cx="80" cy="80"
+                                        stroke-dasharray="377" stroke-dashoffset="75.4"/>
+                            </svg>
+                            <div class="absolute text-center">
+                                <p class="text-4xl font-bold">8.4</p>
+                                <p class="text-xs text-white/60">out of 10</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-white/60">Engagement</span>
+                                    <span class="text-amber-400">92%</span>
+                                </div>
+                                <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full accent-gradient" style="width: 92%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-white/60">Relevance</span>
+                                    <span class="text-amber-400">87%</span>
+                                </div>
+                                <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full accent-gradient" style="width: 87%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-white/60">ROI</span>
+                                    <span class="text-amber-400">78%</span>
+                                </div>
+                                <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full accent-gradient" style="width: 78%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target Demographics & Aesthetics -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                    <!-- Demographics -->
+                    <div class="glass-panel rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">Target Demographics</h3>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm text-white/60 block mb-2">Age Range</label>
+                                <div class="flex gap-4">
+                                    <div class="flex-1 glass-panel p-3 rounded-lg text-center">
+                                        <input type="number" value="18" min="13" max="65"
+                                               class="bg-transparent text-xl font-semibold w-full text-center outline-none">
+                                        <p class="text-xs text-white/40 mt-1">Min Age</p>
+                                    </div>
+                                    <div class="flex items-center text-white/40">—</div>
+                                    <div class="flex-1 glass-panel p-3 rounded-lg text-center">
+                                        <input type="number" value="35" min="13" max="65"
+                                               class="bg-transparent text-xl font-semibold w-full text-center outline-none">
+                                        <p class="text-xs text-white/40 mt-1">Max Age</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-sm text-white/60 block mb-2">Gender</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button class="glass-panel p-3 rounded-lg hover:bg-white/10 transition active">
+                                        <p class="font-semibold">All</p>
+                                    </button>
+                                    <button class="glass-panel p-3 rounded-lg hover:bg-white/10 transition">
+                                        <p class="font-semibold">Female</p>
+                                    </button>
+                                    <button class="glass-panel p-3 rounded-lg hover:bg-white/10 transition">
+                                        <p class="font-semibold">Male</p>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-sm text-white/60 block mb-2">Interests</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="vibe-tag text-sm active">Fashion</span>
+                                    <span class="vibe-tag text-sm active">Home Decor</span>
+                                    <span class="vibe-tag text-sm">Technology</span>
+                                    <span class="vibe-tag text-sm">Travel</span>
+                                    <span class="vibe-tag text-sm active">Wellness</span>
+                                    <span class="vibe-tag text-sm">Art</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aesthetic Targeting -->
+                    <div class="glass-panel rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">Aesthetic Targeting</h3>
+                        <p class="text-sm text-white/60 mb-4">Select vibes that match your brand</p>
+
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <span class="vibe-tag active">🕯️ Cozy</span>
+                            <span class="vibe-tag active">✨ Minimalist</span>
+                            <span class="vibe-tag">🌃 Urban</span>
+                            <span class="vibe-tag active">🌿 Natural</span>
+                            <span class="vibe-tag">🎨 Artistic</span>
+                            <span class="vibe-tag">💎 Luxury</span>
+                            <span class="vibe-tag">🌈 Vibrant</span>
+                            <span class="vibe-tag">🏖️ Beachy</span>
+                            <span class="vibe-tag active">🌙 Moody</span>
+                            <span class="vibe-tag">🎪 Eclectic</span>
+                            <span class="vibe-tag">🏔️ Rustic</span>
+                            <span class="vibe-tag">🔮 Ethereal</span>
+                        </div>
+
+                        <div class="glass-panel p-4 rounded-lg">
+                            <p class="text-sm font-medium mb-2">Selected Vibes (4)</p>
+                            <div class="flex items-center gap-2 text-xs text-white/60">
+                                <span class="px-3 py-1 bg-amber-400/20 text-amber-400 rounded-full">Cozy</span>
+                                <span class="px-3 py-1 bg-amber-400/20 text-amber-400 rounded-full">Minimalist</span>
+                                <span class="px-3 py-1 bg-amber-400/20 text-amber-400 rounded-full">Natural</span>
+                                <span class="px-3 py-1 bg-amber-400/20 text-amber-400 rounded-full">Moody</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Catalog -->
+                <div class="glass-panel rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold">Product Catalog</h3>
+                        <button class="px-4 py-2 glass-panel rounded-lg hover:bg-white/10 transition text-sm">
+                            Manage Products
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <!-- Upload Zone -->
+                        <div class="upload-zone rounded-xl p-6 flex flex-col items-center justify-center min-h-[180px]">
+                            <svg class="w-12 h-12 text-amber-400/50 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <p class="text-sm text-white/60 text-center">Upload Product</p>
+                        </div>
+
+                        <!-- Product Cards -->
+                        <div class="product-card min-h-[180px] group">
+                            <div class="aspect-square bg-gradient-to-br from-amber-400/20 to-orange-500/20 flex items-center justify-center">
+                                <div class="text-center p-4">
+                                    <div class="w-16 h-16 mx-auto bg-amber-400/30 rounded-lg mb-2"></div>
+                                    <p class="text-xs text-white/80">Ceramic Vase</p>
+                                </div>
+                            </div>
+                            <div class="p-2">
+                                <p class="text-xs text-white/60 text-center">$45.99</p>
+                            </div>
+                        </div>
+
+                        <div class="product-card min-h-[180px]">
+                            <div class="aspect-square bg-gradient-to-br from-blue-400/20 to-purple-500/20 flex items-center justify-center">
+                                <div class="text-center p-4">
+                                    <div class="w-16 h-16 mx-auto bg-blue-400/30 rounded-lg mb-2"></div>
+                                    <p class="text-xs text-white/80">Throw Pillow</p>
+                                </div>
+                            </div>
+                            <div class="p-2">
+                                <p class="text-xs text-white/60 text-center">$29.99</p>
+                            </div>
+                        </div>
+
+                        <div class="product-card min-h-[180px]">
+                            <div class="aspect-square bg-gradient-to-br from-green-400/20 to-teal-500/20 flex items-center justify-center">
+                                <div class="text-center p-4">
+                                    <div class="w-16 h-16 mx-auto bg-green-400/30 rounded-lg mb-2"></div>
+                                    <p class="text-xs text-white/80">Plant Pot</p>
+                                </div>
+                            </div>
+                            <div class="p-2">
+                                <p class="text-xs text-white/60 text-center">$34.50</p>
+                            </div>
+                        </div>
+
+                        <div class="product-card min-h-[180px]">
+                            <div class="aspect-square bg-gradient-to-br from-pink-400/20 to-rose-500/20 flex items-center justify-center">
+                                <div class="text-center p-4">
+                                    <div class="w-16 h-16 mx-auto bg-pink-400/30 rounded-lg mb-2"></div>
+                                    <p class="text-xs text-white/80">Candle Set</p>
+                                </div>
+                            </div>
+                            <div class="p-2">
+                                <p class="text-xs text-white/60 text-center">$52.00</p>
+                            </div>
+                        </div>
+
+                        <div class="product-card min-h-[180px]">
+                            <div class="aspect-square bg-gradient-to-br from-yellow-400/20 to-amber-500/20 flex items-center justify-center">
+                                <div class="text-center p-4">
+                                    <div class="w-16 h-16 mx-auto bg-yellow-400/30 rounded-lg mb-2"></div>
+                                    <p class="text-xs text-white/80">Wall Art</p>
+                                </div>
+                            </div>
+                            <div class="p-2">
+                                <p class="text-xs text-white/60 text-center">$89.99</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Budget Slider
+        const budgetSlider = document.getElementById('budgetSlider');
+        const budgetDisplay = document.getElementById('budgetDisplay');
+
+        budgetSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            budgetDisplay.textContent = value.toLocaleString();
+        });
+
+        // Vibe Tags Toggle
+        document.querySelectorAll('.vibe-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('active');
+            });
+        });
+
+        // Gender Buttons Toggle
+        document.querySelectorAll('.grid.grid-cols-3 button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.grid.grid-cols-3 button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        // Product Card Click
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('click', () => {
+                console.log('Product clicked');
+                // Could open a modal here
+            });
+        });
+
+        // Upload Zone Click
+        document.querySelector('.upload-zone').addEventListener('click', () => {
+            // Simulate file upload
+            alert('File upload would trigger here');
+        });
+
+        // Chart Bars Hover Effect
+        document.querySelectorAll('.chart-bar').forEach(bar => {
+            bar.addEventListener('mouseenter', (e) => {
+                const height = e.target.style.height;
+                // Could show tooltip with actual value
+            });
+        });
+    </script>
+
+</body>
+</html>

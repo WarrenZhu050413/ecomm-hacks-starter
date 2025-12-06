@@ -44,16 +44,10 @@ class MediaResult:
 class GeminiService:
     """Service for interacting with Google Gemini API."""
 
-    # Available image models
-    IMAGE_MODELS = {
-        "nano-banana": "gemini-2.5-flash-image",  # Nano Banana (Gemini 2.5 Flash Image)
-        "nano-banana-pro": "gemini-3-pro-image-preview",  # Nano Banana Pro (Gemini 3 Pro Image)
-        "gemini-2.5-flash-image": "gemini-2.5-flash-image",
-        "gemini-3-pro-image-preview": "gemini-3-pro-image-preview",
-        "gemini-2.0-flash-exp": "gemini-2.0-flash-exp",  # Legacy
-    }
+    # Image model - using Gemini 3 Pro Image
+    DEFAULT_IMAGE_MODEL = "gemini-3-pro-image-preview"
 
-    def __init__(self, api_key: str | None = None, default_model: str = "gemini-2.5-flash"):
+    def __init__(self, api_key: str | None = None, default_model: str = "gemini-3-pro-preview"):
         """Initialize the Gemini service.
 
         Args:
@@ -185,8 +179,8 @@ class GeminiService:
         Returns:
             ImageResult with generated images as base64
         """
-        # Resolve model alias
-        model_name = self.IMAGE_MODELS.get(model, model)
+        # Always use Gemini 3 Pro Image
+        model_name = self.DEFAULT_IMAGE_MODEL
 
         # Build config with image generation enabled
         config = types.GenerateContentConfig(
@@ -254,7 +248,7 @@ class GeminiService:
         Returns:
             ImageResult with edited image
         """
-        model_name = self.IMAGE_MODELS.get(model, model)
+        model_name = self.DEFAULT_IMAGE_MODEL
 
         # Build content with both text and image
         contents = [
@@ -332,11 +326,11 @@ class GeminiService:
         Returns:
             MediaResult with text and/or images
         """
-        # Determine model
-        if model:
-            model_name = self.IMAGE_MODELS.get(model, model)
-        elif response_modalities and "IMAGE" in response_modalities:
-            model_name = "gemini-2.5-flash-image"
+        # Determine model - use Gemini 3 Pro Image for image generation
+        if response_modalities and "IMAGE" in response_modalities:
+            model_name = self.DEFAULT_IMAGE_MODEL
+        elif model:
+            model_name = model
         else:
             model_name = self.default_model
 

@@ -1,0 +1,193 @@
+/**
+ * Preset Canvas Configurations
+ *
+ * These are pre-built configurations that can be selected instantly
+ * or discovered through the Q&A onboarding flow.
+ */
+
+import type { CanvasConfig } from '../services/api'
+
+// Poetry preset - the original Ephemeral experience
+export const POETRY_CONFIG: CanvasConfig = {
+  name: 'Ephemeral',
+  description: 'World poetry floating in the dark',
+
+  cardSchema: {
+    fields: [
+      { name: 'flag', type: 'string', display: 'meta' },
+      { name: 'text', type: 'string', display: 'primary' },
+      { name: 'translation', type: 'string?', display: 'secondary' },
+      { name: 'poet', type: 'string', display: 'meta' },
+    ],
+  },
+
+  theme: {
+    background:
+      'linear-gradient(160deg, #0a0a12 0%, #12121f 40%, #0a0a14 100%)',
+    cardStyle: 'glass',
+    typography: 'serif',
+    accent: '#fbbf24',
+  },
+
+  generationPrompt: `Generate a poem in the style of world poetry. Include diverse cultures and styles.
+Return JSON with fields: flag (emoji), text (the poem), translation (if non-English, else omit), poet (name).
+Keep poems short (1-4 lines). Draw from haiku, Chinese poetry, Persian poetry, Western classics.`,
+
+  combinationPrompt: `Given these two poems, weave them into a new verse that captures both their spirits.
+Create something that bridges their cultures and themes while maintaining poetic quality.
+Return JSON with: flag, text, translation (if non-English), poet (use "You" for AI-generated).`,
+
+  hintText: 'Drag poems together to weave new verse',
+
+  seedContent: [
+    {
+      flag: '🇯🇵',
+      text: '古池や蛙飛び込む水の音',
+      translation:
+        'An old silent pond / A frog jumps in / Splash! Silence again',
+      poet: 'Matsuo Bashō',
+    },
+    {
+      flag: '🇮🇷',
+      text: 'The wound is the place where the Light enters you',
+      poet: 'Rumi',
+    },
+    {
+      flag: '🇨🇳',
+      text: '床前明月光，疑是地上霜',
+      translation: 'Moonlight before my bed / Perhaps frost on the ground',
+      poet: 'Li Bai',
+    },
+    {
+      flag: '🇺🇸',
+      text: 'I contain multitudes',
+      poet: 'Walt Whitman',
+    },
+  ],
+}
+
+// Sentences preset - Hemingway-style true sentences
+export const SENTENCES_CONFIG: CanvasConfig = {
+  name: 'Sentences',
+  description: 'Write the truest sentence you know',
+
+  cardSchema: {
+    fields: [
+      { name: 'sentence', type: 'string', display: 'primary' },
+      { name: 'source', type: 'string?', display: 'meta' },
+    ],
+  },
+
+  theme: {
+    background:
+      'linear-gradient(160deg, #0a0a0a 0%, #111111 50%, #0a0a0a 100%)',
+    cardStyle: 'minimal',
+    typography: 'serif',
+    accent: '#fbbf24',
+  },
+
+  generationPrompt: `Generate a true sentence - one that captures something real about life, work, creativity, or human nature.
+Channel the spirit of Hemingway's advice: "Write one true sentence. The truest sentence you know."
+Keep it short, honest, and resonant. No platitudes or clichés.
+Return JSON with: sentence (the sentence), source (optional - author or "observed").`,
+
+  combinationPrompt: `Given these two sentences, synthesize their truths into a new observation.
+Find the connection between them and distill a new insight that honors both.
+Return JSON with: sentence, source (use "synthesized" or a relevant attribution).`,
+
+  hintText: 'Double-click to write your truest sentence',
+
+  seedContent: [
+    {
+      sentence: 'Write one true sentence. The truest sentence you know.',
+      source: 'Ernest Hemingway',
+    },
+    {
+      sentence:
+        'Fortunately, we learn the most when we are not being educated.',
+      source: 'observed',
+    },
+    {
+      sentence: 'The best productivity tool is the one you stop using.',
+      source: 'You',
+    },
+    {
+      sentence: 'Simplicity is the ultimate sophistication.',
+      source: 'Leonardo da Vinci',
+    },
+  ],
+}
+
+// Travel preset - destinations and wanderlust
+export const TRAVEL_CONFIG: CanvasConfig = {
+  name: 'Wanderlust',
+  description: 'Places that call to you',
+
+  cardSchema: {
+    fields: [
+      { name: 'flag', type: 'string', display: 'meta' },
+      { name: 'place', type: 'string', display: 'meta' },
+      { name: 'description', type: 'string', display: 'primary' },
+      { name: 'mood', type: 'string?', display: 'meta' },
+    ],
+  },
+
+  theme: {
+    background:
+      'linear-gradient(160deg, #1a1510 0%, #2a2015 50%, #1a1510 100%)',
+    cardStyle: 'paper',
+    typography: 'serif',
+    accent: '#d97706',
+  },
+
+  generationPrompt: `Generate a travel destination with a evocative description.
+Capture the feeling of a place - what makes it special, what draws people there.
+Include diverse locations: hidden gems, famous landmarks, natural wonders, cultural centers.
+Return JSON with: flag (country emoji), place (city/region, country), description (2-3 sentences), mood (one word like "adventure", "serenity", "culture").`,
+
+  combinationPrompt: `Given these two destinations, imagine a journey that connects them.
+What path would a traveler take? What would they discover along the way?
+Return JSON with: flag (for the route or key location), place, description (the journey or hybrid experience), mood.`,
+
+  hintText: 'Double-click to add your dream destination',
+
+  seedContent: [
+    {
+      flag: '🇯🇵',
+      place: 'Kyoto, Japan',
+      description:
+        'Cherry blossoms fall like snow in temple gardens. The old capital whispers of emperors and geishas.',
+      mood: 'serenity',
+    },
+    {
+      flag: '🇲🇦',
+      place: 'Chefchaouen, Morocco',
+      description:
+        'Lost in the blue maze of the medina, where every alley reveals another shade of indigo.',
+      mood: 'wonder',
+    },
+    {
+      flag: '🇵🇪',
+      place: 'Machu Picchu, Peru',
+      description:
+        'At sunrise, when the mist lifts, the ancient city emerges from clouds like a dream remembered.',
+      mood: 'adventure',
+    },
+    {
+      flag: '🇮🇸',
+      place: 'Iceland',
+      description:
+        'Northern lights dance over black sand beaches. Fire and ice in eternal conversation.',
+      mood: 'awe',
+    },
+  ],
+}
+
+// All presets for easy selection
+export const PRESET_CONFIGS = {
+  poetry: POETRY_CONFIG,
+  sentences: SENTENCES_CONFIG,
+  travel: TRAVEL_CONFIG,
+} as const
+
+export type PresetKey = keyof typeof PRESET_CONFIGS
