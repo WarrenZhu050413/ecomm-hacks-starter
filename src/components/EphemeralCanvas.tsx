@@ -1362,12 +1362,14 @@ export default function EphemeralCanvas({
 
       const handleImageMouseLeave = () => {
         if (!hasProduct) return
+        // Longer delay to check if mouse moved to product overlay
         setTimeout(() => {
-          if (!document.querySelector('.product-overlay:hover')) {
+          const overlayHovered = document.querySelector('.product-overlay:hover')
+          if (!overlayHovered) {
             setHoveredCardId(null)
             setActiveProduct(null)
           }
-        }, 100)
+        }, 150)
         if (hoverTimeoutRef.current) {
           clearTimeout(hoverTimeoutRef.current)
         }

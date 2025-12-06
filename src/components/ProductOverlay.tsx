@@ -40,9 +40,9 @@ export function ProductOverlay({
 
   // Calculate position - to the right of cursor, vertically centered
   const calculatePosition = () => {
-    const gap = 30
-    const cardWidth = 280
-    const cardHeight = 320
+    const gap = 24
+    const cardWidth = 240
+    const cardHeight = 260
 
     let left = position.x + gap
     let top = position.y - cardHeight / 2
