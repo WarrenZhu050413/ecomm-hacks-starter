@@ -68,11 +68,11 @@ cp .env.example .env
 # Add your GEMINI_API_KEY to .env
 uv sync
 uv run uvicorn app.main:app --reload
-
-# Generate test images (optional)
-cd backend
-uv run python test_product_integration.py
 ```
+
+Once running, visit:
+- **Advertiser Console:** http://localhost:5173/console
+- **Consumer Interface:** http://localhost:5173/consumer
 
 ### Screenshots
 ![](./Advertiser_Console1.webp)
