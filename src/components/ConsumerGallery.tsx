@@ -270,7 +270,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     position: { x: number; y: number }
     cardId: string
   } | null>(null)
-  const [isOverProduct, setIsOverProduct] = useState(false)
+  const [productHoverCardId, setProductHoverCardId] = useState<string | null>(null)
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Drag state
@@ -568,7 +568,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
       const overlayHovered = document.querySelector('.product-overlay:hover')
       if (!overlayHovered) {
         setActiveProduct(null)
-        setIsOverProduct(false)
+        setProductHoverCardId(null)
         setCards(prev => prev.map(c => c.id === cardId ? { ...c, isHovered: false } : c))
       }
     }, 150)
@@ -583,7 +583,13 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     const rect = cardElement.getBoundingClientRect()
 
     const overProduct = isMouseOverProductArea(card.id, e.clientX, e.clientY, rect)
-    setIsOverProduct(overProduct)
+
+    // Update product hover state for visual feedback
+    if (overProduct) {
+      setProductHoverCardId(card.id)
+    } else {
+      setProductHoverCardId(null)
+    }
 
     if (overProduct) {
       if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
@@ -640,14 +646,15 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
   }, [cards])
 
   const handleDragMove = useCallback((e: MouseEvent) => {
-    if (!draggingCardId || !dragStartRef.current) return
+    const dragStart = dragStartRef.current
+    if (!dragStart) return
 
     const containerRect = containerRef.current?.getBoundingClientRect()
     if (!containerRect) return
 
     const galleryWidth = containerRect.width * (1 - writingPaneWidth / 100)
-    const deltaX = e.clientX - dragStartRef.current.x
-    const deltaY = e.clientY - dragStartRef.current.y
+    const deltaX = e.clientX - dragStart.x
+    const deltaY = e.clientY - dragStart.y
 
     // Convert pixel delta to percentage (relative to gallery area)
     const deltaXPercent = (deltaX / galleryWidth) * 100
@@ -655,8 +662,8 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     setCards(prev => prev.map(card => {
       if (card.id !== draggingCardId) return card
 
-      let newX = dragStartRef.current!.cardX + deltaXPercent
-      let newY = dragStartRef.current!.cardY + deltaY + scrollOffset - scrollOffsetRef.current
+      let newX = dragStart.cardX + deltaXPercent
+      let newY = dragStart.cardY + deltaY
 
       // Clamp to hard boundaries
       newX = Math.max(12, Math.min(88, newX))
@@ -669,7 +676,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
         vy: 0,
       }
     }))
-  }, [draggingCardId, writingPaneWidth, scrollOffset])
+  }, [draggingCardId, writingPaneWidth])
 
   const handleDragEnd = useCallback(() => {
     setDraggingCardId(null)
@@ -833,7 +840,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
               className={clsx(
                 'gallery-card',
                 card.isHovered && 'hovered',
-                isOverProduct && card.isHovered && 'over-product',
+                productHoverCardId === card.id && 'over-product',
                 draggingCardId === card.id && 'dragging'
               )}
               style={{
@@ -930,7 +937,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
       {/* Debug mode indicator */}
       {debugMode && (
         <div className="debug-badge">
-          Debug | Scroll: {Math.round(scrollOffset)} | Cards: {cards.length} | Over Product: {isOverProduct ? 'Yes' : 'No'}
+          Debug | Scroll: {Math.round(scrollOffset)} | Cards: {cards.length} | Over Product: {productHoverCardId ? 'Yes' : 'No'}
         </div>
       )}
     </div>

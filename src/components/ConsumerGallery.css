@@ -85,15 +85,30 @@
 
 .gallery-card.over-product {
   cursor: pointer;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.5),
+    0 0 0 2px rgba(201, 162, 39, 0.6),
+    0 0 20px rgba(201, 162, 39, 0.3);
 }
 
 .gallery-card.over-product::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(201, 162, 39, 0.15) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(201, 162, 39, 0.15) 100%
+  );
   pointer-events: none;
   border-radius: inherit;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
 }
 
 .gallery-card.dragging {
