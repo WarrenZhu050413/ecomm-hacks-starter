@@ -27,11 +27,13 @@ export function ProductOverlay({
   product,
   position,
   productBounds,
-  sceneImageUrl,
+  sceneImageUrl: _sceneImageUrl,
   onAddToBag,
   onBuyNow,
   onClose
 }: ProductOverlayProps) {
+  // sceneImageUrl reserved for future use (e.g., extracting product from scene)
+  void _sceneImageUrl
   const overlayRef = useRef<HTMLDivElement>(null)
   const addToBagBtnRef = useRef<HTMLButtonElement>(null)
   const [isVisible, setIsVisible] = useState(false)

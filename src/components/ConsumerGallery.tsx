@@ -443,16 +443,36 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
   }, [])
 
   // Check if mouse is over product area using mask
+  // Accounts for object-fit: cover cropping
   const isMouseOverProductArea = useCallback((cardId: string, mouseX: number, mouseY: number, cardRect: DOMRect): boolean => {
     const imageData = maskImageDataRefs.current.get(cardId)
     const canvas = maskCanvasRefs.current.get(cardId)
     if (!imageData || !canvas) return false
 
-    // Map mouse position to mask coordinates
-    const scaleX = canvas.width / cardRect.width
-    const scaleY = canvas.height / cardRect.height
-    const maskX = Math.floor((mouseX - cardRect.left) * scaleX)
-    const maskY = Math.floor((mouseY - cardRect.top) * scaleY)
+    // Calculate how object-fit: cover affects the image display
+    const cardAspect = cardRect.width / cardRect.height
+    const imageAspect = canvas.width / canvas.height
+
+    let visibleWidth: number, visibleHeight: number
+    let offsetX = 0, offsetY = 0
+
+    if (imageAspect > cardAspect) {
+      // Image is wider than card - sides are cropped
+      visibleHeight = canvas.height
+      visibleWidth = canvas.height * cardAspect
+      offsetX = (canvas.width - visibleWidth) / 2
+    } else {
+      // Image is taller than card - top/bottom are cropped
+      visibleWidth = canvas.width
+      visibleHeight = canvas.width / cardAspect
+      offsetY = (canvas.height - visibleHeight) / 2
+    }
+
+    // Map mouse position to mask coordinates (accounting for crop)
+    const relX = (mouseX - cardRect.left) / cardRect.width
+    const relY = (mouseY - cardRect.top) / cardRect.height
+    const maskX = Math.floor(offsetX + relX * visibleWidth)
+    const maskY = Math.floor(offsetY + relY * visibleHeight)
 
     // Bounds check
     if (maskX < 0 || maskX >= canvas.width || maskY < 0 || maskY >= canvas.height) {
@@ -470,17 +490,37 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
   }, [])
 
   // Calculate product bounding box from mask (in screen coordinates)
+  // Accounts for object-fit: cover cropping
   const getProductBounds = useCallback((cardId: string, cardRect: DOMRect): { left: number; right: number; top: number; bottom: number } | null => {
     const imageData = maskImageDataRefs.current.get(cardId)
     const canvas = maskCanvasRefs.current.get(cardId)
     if (!imageData || !canvas) return null
+
+    // Calculate how object-fit: cover affects the image display
+    const cardAspect = cardRect.width / cardRect.height
+    const imageAspect = canvas.width / canvas.height
+
+    let visibleWidth: number, visibleHeight: number
+    let offsetX = 0, offsetY = 0
+
+    if (imageAspect > cardAspect) {
+      // Image is wider than card - sides are cropped
+      visibleHeight = canvas.height
+      visibleWidth = canvas.height * cardAspect
+      offsetX = (canvas.width - visibleWidth) / 2
+    } else {
+      // Image is taller than card - top/bottom are cropped
+      visibleWidth = canvas.width
+      visibleHeight = canvas.width / cardAspect
+      offsetY = (canvas.height - visibleHeight) / 2
+    }
 
     let minX = canvas.width
     let maxX = 0
     let minY = canvas.height
     let maxY = 0
 
-    // Find bounding box of white pixels in mask
+    // Find bounding box of white pixels in mask (only within visible area)
     for (let y = 0; y < canvas.height; y++) {
       for (let x = 0; x < canvas.width; x++) {
         const pixelIndex = (y * canvas.width + x) * 4
@@ -490,25 +530,29 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
         const brightness = (r + g + b) / 3
 
         if (brightness > 128) {
-          if (x < minX) minX = x
-          if (x > maxX) maxX = x
-          if (y < minY) minY = y
-          if (y > maxY) maxY = y
+          // Check if this pixel is within the visible cropped area
+          if (x >= offsetX && x <= offsetX + visibleWidth &&
+              y >= offsetY && y <= offsetY + visibleHeight) {
+            if (x < minX) minX = x
+            if (x > maxX) maxX = x
+            if (y < minY) minY = y
+            if (y > maxY) maxY = y
+          }
         }
       }
     }
 
     if (minX >= maxX || minY >= maxY) return null
 
-    // Convert mask coordinates to screen coordinates
-    const scaleX = cardRect.width / canvas.width
-    const scaleY = cardRect.height / canvas.height
+    // Convert mask coordinates to screen coordinates (accounting for crop)
+    const screenX = (maskX: number) => cardRect.left + ((maskX - offsetX) / visibleWidth) * cardRect.width
+    const screenY = (maskY: number) => cardRect.top + ((maskY - offsetY) / visibleHeight) * cardRect.height
 
     return {
-      left: cardRect.left + minX * scaleX,
-      right: cardRect.left + maxX * scaleX,
-      top: cardRect.top + minY * scaleY,
-      bottom: cardRect.top + maxY * scaleY,
+      left: screenX(minX),
+      right: screenX(maxX),
+      top: screenY(minY),
+      bottom: screenY(maxY),
     }
   }, [])
 
