@@ -51,6 +51,8 @@ Studio Tenwu
 
 ### Setup Instructions
 
+Due to FastAPI compatibity, the Vercel demonstration has difficulty running on certain machines. **Local setup is the most reliable way to run this project**. 
+
 ```bash
 # Clone the repo
 git clone https://github.com/WarrenZhu050413/ecomm-hacks-starter.git
