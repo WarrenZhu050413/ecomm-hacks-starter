@@ -14,7 +14,7 @@ Studio Tenwu
 - Matt Kotzbauer
 
 ### Demo
-- **Live URL:**
+- **Live URL's:**
     - Advertiser Console: https://ecomm-hacks-starter.vercel.app/console
     - Consumer Network: https://ecomm-hacks-starter.vercel.app/consumer
 - **Demo Video:** N/A
@@ -29,9 +29,9 @@ Studio Tenwu
 
 2. **Mask-Based Hover Detection**: Nano Banana also generates a segmentation mask that identifies exactly where the product is in the scene. We use red-channel extraction to create a clean binary mask (white for product, black for background).
 
-3. **Natural Product Discovery**: When users hover over a product area (detected with canvas pixel sampling of the mask), a subtle highlight appears and a translucent product card slides in. Users can add the product to their bag or complete a 1-click purchase.
+3. **Natural Product Discovery**: When users hover over a product area (detected with canvas pixel sampling of the mask), a subtle highlight appears and a translucent product card slides in. Users can add the product to their bag or do a 1-click purchase.
 
-4. **Non-Intrusive UX**: The focus of the UX is that ads don't interrupt the consumption experience, instead being placed in locations that match their aesthetic preferences and incite curiosity.
+4. **Non-Intrusive UX**: The focus of the UX is that ads don't interrupt the consumer experience, instead being placed in locations that match their aesthetic preferences and incite curiosity.
 
 ### Key Features
 
