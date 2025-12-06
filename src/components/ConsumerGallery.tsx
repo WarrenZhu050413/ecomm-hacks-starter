@@ -299,6 +299,10 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
   const [draggingCardId, setDraggingCardId] = useState<string | null>(null)
   const dragStartRef = useRef<{ x: number; y: number; cardX: number; cardY: number } | null>(null)
 
+  // Resize state
+  const [resizingCardId, setResizingCardId] = useState<string | null>(null)
+  const resizeStartRef = useRef<{ x: number; y: number; cardWidth: number; cardHeight: number } | null>(null)
+
   // Refs
   const containerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number>()
@@ -343,10 +347,10 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     const galleryItem = items[Math.floor(Math.random() * items.length)]!
     usedGalleryIds.current.add(galleryItem.id)
 
-    // Pinterest-style: smaller cards, more variety in sizes
-    const widthOptions = [160, 180, 200, 220]
+    // Card sizes - 30% larger than original Pinterest-style
+    const widthOptions = [208, 234, 260, 286]
     const width = widthOptions[Math.floor(Math.random() * widthOptions.length)]!
-    // More height variety for Pinterest masonry effect
+    // Height variety for masonry effect
     const heightRatio = 0.7 + Math.random() * 0.6 // 0.7 to 1.3 (mix of portrait/landscape)
     const height = Math.floor(width * heightRatio)
 
@@ -977,6 +981,67 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     }
   }, [draggingCardId, handleDragMove, handleDragEnd])
 
+  // Resize handlers
+  const handleResizeStart = useCallback((cardId: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation() // Prevent drag from starting
+    const card = cards.find(c => c.id === cardId)
+    if (!card) return
+
+    setResizingCardId(cardId)
+    resizeStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      cardWidth: card.width,
+      cardHeight: card.height,
+    }
+  }, [cards])
+
+  const handleResizeMove = useCallback((e: MouseEvent) => {
+    const resizeStart = resizeStartRef.current
+    if (!resizeStart || !resizingCardId) return
+
+    const deltaX = e.clientX - resizeStart.x
+    const deltaY = e.clientY - resizeStart.y
+
+    // Use the larger delta to maintain aspect ratio
+    const delta = Math.max(deltaX, deltaY)
+
+    setCards(prev => prev.map(card => {
+      if (card.id !== resizingCardId) return card
+
+      const aspectRatio = resizeStart.cardHeight / resizeStart.cardWidth
+      let newWidth = Math.max(120, Math.min(400, resizeStart.cardWidth + delta))
+      let newHeight = Math.round(newWidth * aspectRatio)
+
+      // Clamp height as well
+      newHeight = Math.max(100, Math.min(500, newHeight))
+
+      return {
+        ...card,
+        width: newWidth,
+        height: newHeight,
+      }
+    }))
+  }, [resizingCardId])
+
+  const handleResizeEnd = useCallback(() => {
+    setResizingCardId(null)
+    resizeStartRef.current = null
+  }, [])
+
+  // Add global mouse listeners for resize
+  useEffect(() => {
+    if (resizingCardId) {
+      window.addEventListener('mousemove', handleResizeMove)
+      window.addEventListener('mouseup', handleResizeEnd)
+      return () => {
+        window.removeEventListener('mousemove', handleResizeMove)
+        window.removeEventListener('mouseup', handleResizeEnd)
+      }
+    }
+  }, [resizingCardId, handleResizeMove, handleResizeEnd])
+
   // Shopping handlers
   const handleAddToBag = useCallback((product: Product, cardId: string) => {
     // Add to bag immediately
@@ -1264,6 +1329,11 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                   Show Original Image
                 </button>
               )}
+              {/* Resize handle - bottom right corner */}
+              <div
+                className={clsx('resize-handle', resizingCardId === card.id && 'resizing')}
+                onMouseDown={e => handleResizeStart(card.id, e)}
+              />
             </div>
           )
         })}

@@ -432,3 +432,42 @@
   background: rgba(201, 162, 39, 0.4);
   color: #fff;
 }
+
+/* Resize Handle */
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.resize-handle::before {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 0 0 4px 0;
+}
+
+.gallery-card:hover .resize-handle {
+  opacity: 1;
+}
+
+.resize-handle:hover::before,
+.resize-handle.resizing::before {
+  border-color: rgba(201, 162, 39, 0.8);
+}
+
+.gallery-card.dragging .resize-handle {
+  opacity: 0;
+  pointer-events: none;
+}
