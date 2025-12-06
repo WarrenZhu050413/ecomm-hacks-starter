@@ -83,8 +83,24 @@
     0 0 0 2px rgba(201, 162, 39, 0.3);
 }
 
-.gallery-card.has-product {
+.gallery-card.over-product {
   cursor: pointer;
+}
+
+.gallery-card.over-product::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.gallery-card.dragging {
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.6),
+    0 0 0 2px rgba(201, 162, 39, 0.5);
+  transition: none;
 }
 
 .gallery-card-image {
@@ -164,41 +180,25 @@
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
 }
 
-.expanded-product-hint {
+.expanded-esc-hint {
   position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.7);
+  bottom: 16px;
+  right: 16px;
+  padding: 4px 10px;
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.75rem;
-  border-radius: 20px;
-  opacity: 0.8;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.65rem;
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.expanded-close-btn {
-  position: absolute;
-  top: -12px;
-  right: -12px;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  color: #333;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease;
-}
-
-.expanded-close-btn:hover {
-  transform: scale(1.1);
+.expanded-card:hover .expanded-esc-hint {
+  opacity: 1;
 }
 
 /* Shopping Bag Button */

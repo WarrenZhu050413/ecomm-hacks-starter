@@ -99,9 +99,6 @@ export function ProductOverlay({
       {/* Product Info */}
       <div className="overlay-content">
         <h3 className="overlay-name">{product.name}</h3>
-        {product.description && (
-          <p className="overlay-description">{product.description}</p>
-        )}
         <div className="overlay-price">{formatPrice(product.price, product.currency)}</div>
 
         {/* Action Buttons - side by side */}
@@ -129,9 +126,6 @@ export function ProductOverlay({
           </button>
         </div>
       </div>
-
-      {/* Subtle close hint */}
-      <div className="overlay-close-hint">Move away to close</div>
     </div>
   )
 }

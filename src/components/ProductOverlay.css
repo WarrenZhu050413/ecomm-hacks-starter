@@ -82,26 +82,18 @@
 
 .overlay-name {
   font-family: 'Crimson Pro', serif;
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--pencil);
-  margin: 0 0 0.25rem;
-  line-height: 1.25;
-}
-
-.overlay-description {
-  font-size: 0.7rem;
-  color: var(--sepia-light);
-  margin: 0 0 0.5rem;
-  line-height: 1.35;
-  opacity: 0.85;
+  margin: 0 0 0.2rem;
+  line-height: 1.2;
 }
 
 .overlay-price {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--pencil);
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.5rem;
 }
 
 /* Action Buttons */
@@ -156,12 +148,3 @@
   transform: translateY(-1px);
 }
 
-/* Close Hint */
-.overlay-close-hint {
-  padding: 0.5rem;
-  text-align: center;
-  font-size: 0.65rem;
-  color: var(--sepia-light);
-  opacity: 0.6;
-  border-top: 1px solid rgba(139, 115, 85, 0.1);
-}

@@ -1,8 +1,9 @@
 /**
- * ConsumerGallery - Image-only scrollable gallery with product placement
+ * ConsumerGallery - Image-only scrollable gallery with mask-based product hover
  *
  * Features:
- * - Images only (no text cards)
+ * - Images only (no text cards) - AI-generated scenes with products placed
+ * - Mask-based hover detection (only hover on product area triggers popup)
  * - Subtle vertical drift, minimal horizontal movement
  * - Hover pauses card, full opacity, prevents fade
  * - Double-click expands image to right 2/3 of screen
@@ -22,161 +23,204 @@ import { WritingPane } from './WritingPane'
 import { ResizeDivider } from './ResizeDivider'
 import './ConsumerGallery.css'
 
-// Luxury brand product images (using web sources)
-const LUXURY_PRODUCTS: Array<{
+// Gallery item from manifest
+interface GalleryItem {
   id: string
-  imageUrl: string
-  maskUrl?: string
+  sceneUrl: string
+  maskUrl: string
+  productImageUrl: string
   product: Product
-}> = [
-  {
-    id: 'lv-neverfull-1',
-    imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&q=80',
-    product: {
-      id: 'lv-001',
-      name: 'Neverfull MM',
-      brand: 'Louis Vuitton',
-      price: 2030,
-      currency: 'USD',
-      imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&q=80',
-      description: 'Iconic tote in Monogram canvas',
-    },
-  },
-  {
-    id: 'gucci-marmont-1',
-    imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80',
-    product: {
-      id: 'gucci-001',
-      name: 'GG Marmont Small Bag',
-      brand: 'Gucci',
-      price: 2350,
-      currency: 'USD',
-      imageUrl: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80',
-      description: 'Matelassé leather with Double G',
-    },
-  },
-  {
-    id: 'chanel-classic-1',
-    imageUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=800&q=80',
-    product: {
-      id: 'chanel-001',
-      name: 'Classic Flap Bag',
-      brand: 'Chanel',
-      price: 8200,
-      currency: 'USD',
-      imageUrl: 'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=400&q=80',
-      description: 'Lambskin with gold-tone hardware',
-    },
-  },
-  {
-    id: 'hermes-birkin-1',
-    imageUrl: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&q=80',
-    product: {
-      id: 'hermes-001',
-      name: 'Birkin 25',
-      brand: 'Hermès',
-      price: 12500,
-      currency: 'USD',
-      imageUrl: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=400&q=80',
-      description: 'Togo leather in Étoupe',
-    },
-  },
-  {
-    id: 'dior-saddle-1',
-    imageUrl: 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=800&q=80',
-    product: {
-      id: 'dior-001',
-      name: 'Saddle Bag',
-      brand: 'Dior',
-      price: 3800,
-      currency: 'USD',
-      imageUrl: 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=400&q=80',
-      description: 'Blue oblique jacquard canvas',
-    },
-  },
-  {
-    id: 'prada-galleria-1',
-    imageUrl: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80',
-    product: {
-      id: 'prada-001',
-      name: 'Galleria Saffiano',
-      brand: 'Prada',
-      price: 3200,
-      currency: 'USD',
-      imageUrl: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&q=80',
-      description: 'Saffiano leather tote',
-    },
-  },
-  {
-    id: 'bottega-cassette-1',
-    imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800&q=80',
-    product: {
-      id: 'bottega-001',
-      name: 'Cassette Bag',
-      brand: 'Bottega Veneta',
-      price: 3100,
-      currency: 'USD',
-      imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&q=80',
-      description: 'Intrecciato leather crossbody',
-    },
-  },
-  {
-    id: 'celine-triomphe-1',
-    imageUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=800&q=80',
-    product: {
-      id: 'celine-001',
-      name: 'Triomphe Bag',
-      brand: 'Celine',
-      price: 2950,
-      currency: 'USD',
-      imageUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&q=80',
-      description: 'Shiny calfskin with clasp',
-    },
-  },
-  {
-    id: 'ysl-loulou-1',
-    imageUrl: 'https://images.unsplash.com/photo-1575032617751-6ddec2089882?w=800&q=80',
-    product: {
-      id: 'ysl-001',
-      name: 'Loulou Medium',
-      brand: 'Saint Laurent',
-      price: 2590,
-      currency: 'USD',
-      imageUrl: 'https://images.unsplash.com/photo-1575032617751-6ddec2089882?w=400&q=80',
-      description: '"Y" quilted leather',
-    },
-  },
-  {
-    id: 'fendi-baguette-1',
-    imageUrl: 'https://images.unsplash.com/photo-1614179689702-355944cd0918?w=800&q=80',
-    product: {
-      id: 'fendi-001',
-      name: 'Baguette',
-      brand: 'Fendi',
-      price: 3390,
-      currency: 'USD',
-      imageUrl: 'https://images.unsplash.com/photo-1614179689702-355944cd0918?w=400&q=80',
-      description: 'FF embroidered fabric',
-    },
-  },
-]
+}
 
-// Additional lifestyle images (no product attached)
-const LIFESTYLE_IMAGES = [
-  'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80',
-  'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80',
-  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80',
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
-  'https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80',
-  'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80',
-  'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80',
-  'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&q=80',
+// Load manifest data - 13 gallery items
+const GALLERY_ITEMS: GalleryItem[] = [
+  {
+    id: "gallery-0",
+    sceneUrl: "/gallery/scene_0.png",
+    maskUrl: "/gallery/mask_0.png",
+    productImageUrl: "/gallery/product_0.jpg",
+    product: {
+      id: "product-0",
+      name: "Neverfull MM",
+      brand: "Louis Vuitton",
+      price: 2030,
+      currency: "USD",
+      imageUrl: "/gallery/product_0.jpg",
+    }
+  },
+  {
+    id: "gallery-1",
+    sceneUrl: "/gallery/scene_1.png",
+    maskUrl: "/gallery/mask_1.png",
+    productImageUrl: "/gallery/product_1.jpg",
+    product: {
+      id: "product-1",
+      name: "GG Marmont",
+      brand: "Gucci",
+      price: 2350,
+      currency: "USD",
+      imageUrl: "/gallery/product_1.jpg",
+    }
+  },
+  {
+    id: "gallery-2",
+    sceneUrl: "/gallery/scene_2.png",
+    maskUrl: "/gallery/mask_2.png",
+    productImageUrl: "/gallery/product_2.jpg",
+    product: {
+      id: "product-2",
+      name: "Classic Flap",
+      brand: "Chanel",
+      price: 8200,
+      currency: "USD",
+      imageUrl: "/gallery/product_2.jpg",
+    }
+  },
+  {
+    id: "gallery-3",
+    sceneUrl: "/gallery/scene_3.png",
+    maskUrl: "/gallery/mask_3.png",
+    productImageUrl: "/gallery/product_3.jpg",
+    product: {
+      id: "product-3",
+      name: "Galleria Saffiano",
+      brand: "Prada",
+      price: 3200,
+      currency: "USD",
+      imageUrl: "/gallery/product_3.jpg",
+    }
+  },
+  {
+    id: "gallery-4",
+    sceneUrl: "/gallery/scene_4.png",
+    maskUrl: "/gallery/mask_4.png",
+    productImageUrl: "/gallery/product_4.jpg",
+    product: {
+      id: "product-4",
+      name: "Loulou Medium",
+      brand: "Saint Laurent",
+      price: 2590,
+      currency: "USD",
+      imageUrl: "/gallery/product_4.jpg",
+    }
+  },
+  {
+    id: "gallery-5",
+    sceneUrl: "/gallery/scene_5.png",
+    maskUrl: "/gallery/mask_5.png",
+    productImageUrl: "/gallery/product_5.jpg",
+    product: {
+      id: "product-5",
+      name: "Triomphe Bag",
+      brand: "Celine",
+      price: 2950,
+      currency: "USD",
+      imageUrl: "/gallery/product_5.jpg",
+    }
+  },
+  {
+    id: "gallery-6",
+    sceneUrl: "/gallery/scene_6.png",
+    maskUrl: "/gallery/mask_6.png",
+    productImageUrl: "/gallery/product_6.jpg",
+    product: {
+      id: "product-6",
+      name: "Le Pliage",
+      brand: "Longchamp",
+      price: 145,
+      currency: "USD",
+      imageUrl: "/gallery/product_6.jpg",
+    }
+  },
+  {
+    id: "gallery-7",
+    sceneUrl: "/gallery/scene_7.png",
+    maskUrl: "/gallery/mask_7.png",
+    productImageUrl: "/gallery/product_7.jpg",
+    product: {
+      id: "product-7",
+      name: "Puzzle Bag",
+      brand: "Loewe",
+      price: 3650,
+      currency: "USD",
+      imageUrl: "/gallery/product_7.jpg",
+    }
+  },
+  {
+    id: "gallery-8",
+    sceneUrl: "/gallery/scene_8.png",
+    maskUrl: "/gallery/mask_8.png",
+    productImageUrl: "/gallery/product_8.jpg",
+    product: {
+      id: "product-8",
+      name: "Dionysus",
+      brand: "Gucci",
+      price: 2980,
+      currency: "USD",
+      imageUrl: "/gallery/product_8.jpg",
+    }
+  },
+  {
+    id: "gallery-9",
+    sceneUrl: "/gallery/scene_9.png",
+    maskUrl: "/gallery/mask_9.png",
+    productImageUrl: "/gallery/product_9.jpg",
+    product: {
+      id: "product-9",
+      name: "Peekaboo ISeeU",
+      brand: "Fendi",
+      price: 4200,
+      currency: "USD",
+      imageUrl: "/gallery/product_9.jpg",
+    }
+  },
+  {
+    id: "gallery-10",
+    sceneUrl: "/gallery/scene_10.png",
+    maskUrl: "/gallery/mask_10.png",
+    productImageUrl: "/gallery/product_10.jpg",
+    product: {
+      id: "product-10",
+      name: "Speedy Bandouliere",
+      brand: "Louis Vuitton",
+      price: 1640,
+      currency: "USD",
+      imageUrl: "/gallery/product_10.jpg",
+    }
+  },
+  {
+    id: "gallery-11",
+    sceneUrl: "/gallery/scene_11.png",
+    maskUrl: "/gallery/mask_11.png",
+    productImageUrl: "/gallery/product_11.jpg",
+    product: {
+      id: "product-11",
+      name: "Lady Dior",
+      brand: "Dior",
+      price: 5500,
+      currency: "USD",
+      imageUrl: "/gallery/product_11.jpg",
+    }
+  },
+  {
+    id: "gallery-12",
+    sceneUrl: "/gallery/scene_12.png",
+    maskUrl: "/gallery/mask_12.png",
+    productImageUrl: "/gallery/product_12.jpg",
+    product: {
+      id: "product-12",
+      name: "Cabas Phantom",
+      brand: "Celine",
+      price: 2100,
+      currency: "USD",
+      imageUrl: "/gallery/product_12.jpg",
+    }
+  },
 ]
 
 interface ImageCard {
   id: string
-  imageUrl: string
-  product?: Product
+  galleryItem: GalleryItem
   x: number
   y: number // Absolute Y position in scroll space
   vx: number
@@ -200,7 +244,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
   // Cards state
   const [cards, setCards] = useState<ImageCard[]>([])
   const [scrollOffset, setScrollOffset] = useState(0)
-  const [totalHeight, setTotalHeight] = useState(2000) // Grows as we scroll
+  const [totalHeight, setTotalHeight] = useState(2500)
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
 
   // Writing pane state
@@ -226,72 +270,93 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     position: { x: number; y: number }
     cardId: string
   } | null>(null)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_hoveredCardId, setHoveredCardId] = useState<string | null>(null)
+  const [isOverProduct, setIsOverProduct] = useState(false)
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Drag state
+  const [draggingCardId, setDraggingCardId] = useState<string | null>(null)
+  const dragStartRef = useRef<{ x: number; y: number; cardX: number; cardY: number } | null>(null)
 
   // Refs
   const containerRef = useRef<HTMLDivElement>(null)
   const animationRef = useRef<number>()
-  const cardsRef = useRef<ImageCard[]>(cards)
   const scrollOffsetRef = useRef(scrollOffset)
-  const usedProductIds = useRef<Set<string>>(new Set())
-  const usedImageUrls = useRef<Set<string>>(new Set())
+  const usedGalleryIds = useRef<Set<string>>(new Set())
 
-  cardsRef.current = cards
+  // Mask canvas refs for hover detection
+  const maskCanvasRefs = useRef<Map<string, HTMLCanvasElement>>(new Map())
+  const maskImageDataRefs = useRef<Map<string, ImageData>>(new Map())
+
   scrollOffsetRef.current = scrollOffset
 
-  // Create a new card
-  const createCard = useCallback((y?: number): ImageCard => {
-    // Decide if product card (60% chance) or lifestyle (40%)
-    const useProduct = Math.random() < 0.6
-
-    let imageUrl: string
-    let product: Product | undefined
-
-    if (useProduct) {
-      // Find unused product
-      const available = LUXURY_PRODUCTS.filter(p => !usedProductIds.current.has(p.id))
-      if (available.length > 0) {
-        const selected = available[Math.floor(Math.random() * available.length)]!
-        imageUrl = selected.imageUrl
-        product = selected.product
-        usedProductIds.current.add(selected.id)
-      } else {
-        // All used, reset and pick random
-        usedProductIds.current.clear()
-        const selected = LUXURY_PRODUCTS[Math.floor(Math.random() * LUXURY_PRODUCTS.length)]!
-        imageUrl = selected.imageUrl
-        product = selected.product
-        usedProductIds.current.add(selected.id)
-      }
-    } else {
-      // Lifestyle image
-      const available = LIFESTYLE_IMAGES.filter(url => !usedImageUrls.current.has(url))
-      if (available.length > 0) {
-        imageUrl = available[Math.floor(Math.random() * available.length)]!
-        usedImageUrls.current.add(imageUrl)
-      } else {
-        usedImageUrls.current.clear()
-        imageUrl = LIFESTYLE_IMAGES[Math.floor(Math.random() * LIFESTYLE_IMAGES.length)]!
-        usedImageUrls.current.add(imageUrl)
+  // Check if a new card would overlap with existing cards
+  const wouldOverlap = useCallback((newX: number, newY: number, newHeight: number, existingCards: ImageCard[]): boolean => {
+    const padding = 40
+    for (const card of existingCards) {
+      const horizontalDistance = Math.abs(card.x - newX)
+      if (horizontalDistance < 22) {
+        const verticalDistance = Math.abs(card.y - newY)
+        const combinedHeight = (card.height + newHeight) / 2 + padding
+        if (verticalDistance < combinedHeight) {
+          return true
+        }
       }
     }
+    return false
+  }, [])
 
-    // Random size (aspect ratios)
-    const widthOptions = [220, 260, 300, 340]
+  // Create a new card with non-overlapping placement
+  const createCard = useCallback((y?: number, existingCards?: ImageCard[]): ImageCard | null => {
+    // Find unused gallery item
+    const available = GALLERY_ITEMS.filter(item => !usedGalleryIds.current.has(item.id))
+    if (available.length === 0) {
+      // All used, reset
+      usedGalleryIds.current.clear()
+    }
+
+    const items = available.length > 0 ? available : GALLERY_ITEMS
+    const galleryItem = items[Math.floor(Math.random() * items.length)]!
+    usedGalleryIds.current.add(galleryItem.id)
+
+    // Smaller card sizes for higher density
+    const widthOptions = [200, 240, 260]
     const width = widthOptions[Math.floor(Math.random() * widthOptions.length)]!
-    const heightRatio = 0.8 + Math.random() * 0.6 // 0.8 to 1.4
+    const heightRatio = 0.65 + Math.random() * 0.25 // 0.65 to 0.9 (landscape oriented)
     const height = Math.floor(width * heightRatio)
+
+    // Find a non-overlapping position using columns
+    let x: number
+    let cardY = y ?? scrollOffsetRef.current + Math.random() * window.innerHeight
+    let attempts = 0
+    const maxAttempts = 20
+
+    // Use 4 columns for higher density, with hard padding from edges
+    // Columns positioned so cards stay fully visible (accounting for card width)
+    const columns = [18, 38, 58, 78] // 4 columns, spaced evenly
+
+    do {
+      const columnIndex = Math.floor(Math.random() * columns.length)
+      x = columns[columnIndex]! + (Math.random() - 0.5) * 8
+
+      // Clamp to ensure cards don't get cut off at edges
+      // Card is centered at x%, so need to account for half-width
+      const minX = 12 // Hard left boundary
+      const maxX = 88 // Hard right boundary
+      x = Math.max(minX, Math.min(maxX, x))
+
+      if (attempts > maxAttempts / 2 && existingCards) {
+        cardY += 80 + Math.random() * 40
+      }
+      attempts++
+    } while (existingCards && wouldOverlap(x, cardY, height, existingCards) && attempts < maxAttempts)
 
     return {
       id: `card-${++cardIdCounter}`,
-      imageUrl,
-      product,
-      x: 15 + Math.random() * 50, // 15-65% from left (within right 2/3)
-      y: y ?? scrollOffsetRef.current + Math.random() * window.innerHeight,
-      vx: (Math.random() - 0.5) * 0.02, // Very slow horizontal
-      vy: (Math.random() - 0.5) * 0.08, // Slightly more vertical
+      galleryItem,
+      x,
+      y: cardY,
+      vx: (Math.random() - 0.5) * 0.01,
+      vy: (Math.random() - 0.5) * 0.04,
       opacity: 0,
       scale: 1,
       spawnTime: Date.now(),
@@ -300,17 +365,71 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
       width,
       height,
     }
+  }, [wouldOverlap])
+
+  // Load mask image data for a card
+  const loadMaskForCard = useCallback((cardId: string, maskUrl: string) => {
+    if (maskImageDataRefs.current.has(cardId)) return
+
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      if (!ctx) return
+
+      ctx.drawImage(img, 0, 0)
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+
+      maskCanvasRefs.current.set(cardId, canvas)
+      maskImageDataRefs.current.set(cardId, imageData)
+    }
+    img.src = maskUrl
   }, [])
 
-  // Initialize with cards
+  // Check if mouse is over product area using mask
+  const isMouseOverProductArea = useCallback((cardId: string, mouseX: number, mouseY: number, cardRect: DOMRect): boolean => {
+    const imageData = maskImageDataRefs.current.get(cardId)
+    const canvas = maskCanvasRefs.current.get(cardId)
+    if (!imageData || !canvas) return false
+
+    // Map mouse position to mask coordinates
+    const scaleX = canvas.width / cardRect.width
+    const scaleY = canvas.height / cardRect.height
+    const maskX = Math.floor((mouseX - cardRect.left) * scaleX)
+    const maskY = Math.floor((mouseY - cardRect.top) * scaleY)
+
+    // Bounds check
+    if (maskX < 0 || maskX >= canvas.width || maskY < 0 || maskY >= canvas.height) {
+      return false
+    }
+
+    // Get pixel brightness
+    const pixelIndex = (maskY * canvas.width + maskX) * 4
+    const r = imageData.data[pixelIndex] ?? 0
+    const g = imageData.data[pixelIndex + 1] ?? 0
+    const b = imageData.data[pixelIndex + 2] ?? 0
+    const brightness = (r + g + b) / 3
+
+    return brightness > 128 // White = product area
+  }, [])
+
+  // Initialize with cards (higher density)
   useEffect(() => {
     const initialCards: ImageCard[] = []
-    for (let i = 0; i < 8; i++) {
-      const card = createCard(100 + i * 250 + Math.random() * 100)
-      initialCards.push(card)
+    for (let i = 0; i < 12; i++) {
+      const yBase = 40 + i * 200 // Tighter vertical spacing
+      const card = createCard(yBase + Math.random() * 50, initialCards)
+      if (card) {
+        initialCards.push(card)
+        // Load mask for hover detection
+        loadMaskForCard(card.id, card.galleryItem.maskUrl)
+      }
     }
     setCards(initialCards)
-  }, [createCard])
+  }, [createCard, loadMaskForCard])
 
   // Animation loop
   useEffect(() => {
@@ -328,27 +447,27 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
           const age = now - card.spawnTime
 
           // Fade in
-          if (age < 600) {
-            opacity = age / 600
+          if (age < 800) {
+            opacity = age / 800
           } else {
             opacity = 1
           }
 
-          // Apply velocity (subtle drift)
-          x += vx * 0.15
-          y += vy * 0.15
+          // Apply velocity (very subtle drift)
+          x += vx * 0.1
+          y += vy * 0.1
 
           // Damping
-          vx *= 0.998
-          vy *= 0.998
+          vx *= 0.999
+          vy *= 0.999
 
-          // Add tiny jiggle (more vertical)
-          vx += (Math.random() - 0.5) * 0.003
-          vy += (Math.random() - 0.5) * 0.008
+          // Add tiny jiggle (mostly vertical)
+          vx += (Math.random() - 0.5) * 0.002
+          vy += (Math.random() - 0.5) * 0.005
 
-          // Horizontal bounds (keep in right 2/3 area, accounting for writing pane)
-          if (x < 5) { x = 5; vx = Math.abs(vx) * 0.3 }
-          if (x > 85) { x = 85; vx = -Math.abs(vx) * 0.3 }
+          // Horizontal bounds
+          if (x < 8) { x = 8; vx = Math.abs(vx) * 0.2 }
+          if (x > 88) { x = 88; vx = -Math.abs(vx) * 0.2 }
 
           return { ...card, x, y, vx, vy, opacity }
         })
@@ -369,29 +488,44 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
       const viewportHeight = window.innerHeight
       const visibleBottom = scrollOffset + viewportHeight
 
-      // If we're near the bottom of our content, spawn more
       if (visibleBottom > totalHeight - viewportHeight) {
-        // Add more cards below
-        const newCards: ImageCard[] = []
-        for (let i = 0; i < 4; i++) {
-          const card = createCard(totalHeight + i * 200 + Math.random() * 100)
-          newCards.push(card)
-        }
-        setCards(prev => [...prev, ...newCards])
-        setTotalHeight(prev => prev + 1000)
+        setCards(prev => {
+          const newCards: ImageCard[] = [...prev]
+          for (let i = 0; i < 6; i++) { // Spawn more cards at once
+            const yBase = totalHeight + i * 200 // Tighter spacing
+            const card = createCard(yBase + Math.random() * 50, newCards)
+            if (card) {
+              newCards.push(card)
+              loadMaskForCard(card.id, card.galleryItem.maskUrl)
+            }
+          }
+          return newCards
+        })
+        setTotalHeight(prev => prev + 1400)
       }
     }
     checkSpawn()
-  }, [scrollOffset, totalHeight, createCard])
+  }, [scrollOffset, totalHeight, createCard, loadMaskForCard])
+
+  // Handle Escape key to close expanded view
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && expandedCardId) {
+        setExpandedCardId(null)
+        setCards(prev => prev.map(c => ({ ...c, isExpanded: false })))
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [expandedCardId])
 
   // Handle scroll
   const handleWheel = useCallback((e: WheelEvent) => {
-    // Only scroll if mouse is in the image area (not writing pane)
     const rect = containerRef.current?.getBoundingClientRect()
     if (!rect) return
 
     const writingPaneEnd = rect.left + (rect.width * writingPaneWidth / 100)
-    if (e.clientX < writingPaneEnd) return // In writing pane, let it scroll naturally
+    if (e.clientX < writingPaneEnd) return
 
     e.preventDefault()
     setScrollOffset(prev => Math.max(0, prev + e.deltaY * 0.8))
@@ -404,22 +538,20 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     return () => container.removeEventListener('wheel', handleWheel)
   }, [handleWheel])
 
-  // Calculate visible Y position (accounting for scroll)
+  // Calculate visible Y position
   const getVisibleY = (absoluteY: number) => absoluteY - scrollOffset
 
   // Calculate fade opacity based on position
   const getFadeOpacity = (visibleY: number, cardHeight: number) => {
     const viewportHeight = window.innerHeight
-    const fadeZone = viewportHeight * 0.125 // 1/8 of screen
+    const fadeZone = viewportHeight * 0.125
 
     const cardTop = visibleY
     const cardBottom = visibleY + cardHeight
 
-    // Top fade zone
     if (cardTop < fadeZone) {
       return Math.max(0, cardTop / fadeZone)
     }
-    // Bottom fade zone
     if (cardBottom > viewportHeight - fadeZone) {
       return Math.max(0, (viewportHeight - cardBottom + cardHeight) / fadeZone)
     }
@@ -428,24 +560,58 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
 
   // Handle hover
   const handleCardMouseEnter = useCallback((cardId: string) => {
-    setHoveredCardId(cardId)
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, isHovered: true } : c))
   }, [])
 
   const handleCardMouseLeave = useCallback((cardId: string) => {
-    // Delay to check if moved to product overlay
     setTimeout(() => {
       const overlayHovered = document.querySelector('.product-overlay:hover')
       if (!overlayHovered) {
-        setHoveredCardId(null)
         setActiveProduct(null)
+        setIsOverProduct(false)
         setCards(prev => prev.map(c => c.id === cardId ? { ...c, isHovered: false } : c))
       }
     }, 150)
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+    }
   }, [])
+
+  // Handle mouse move over card for mask detection
+  const handleCardMouseMove = useCallback((card: ImageCard, e: React.MouseEvent<HTMLDivElement>) => {
+    const cardElement = e.currentTarget
+    const rect = cardElement.getBoundingClientRect()
+
+    const overProduct = isMouseOverProductArea(card.id, e.clientX, e.clientY, rect)
+    setIsOverProduct(overProduct)
+
+    if (overProduct) {
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+
+      hoverTimeoutRef.current = setTimeout(() => {
+        setActiveProduct({
+          product: card.galleryItem.product,
+          position: { x: e.clientX, y: e.clientY },
+          cardId: card.id,
+        })
+      }, 600) // 600ms delay before showing product card
+    } else {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current)
+      }
+      // Only clear if not hovering on overlay
+      setTimeout(() => {
+        const overlayHovered = document.querySelector('.product-overlay:hover')
+        if (!overlayHovered) {
+          setActiveProduct(null)
+        }
+      }, 100)
+    }
+  }, [isMouseOverProductArea])
 
   // Handle double click to expand
   const handleCardDoubleClick = useCallback((cardId: string) => {
+    if (draggingCardId) return // Don't expand while dragging
     if (expandedCardId === cardId) {
       setExpandedCardId(null)
       setCards(prev => prev.map(c => c.id === cardId ? { ...c, isExpanded: false } : c))
@@ -456,22 +622,71 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
         isExpanded: c.id === cardId,
       })))
     }
-  }, [expandedCardId])
+  }, [expandedCardId, draggingCardId])
 
-  // Handle product hover
-  const handleProductHover = useCallback((card: ImageCard, e: React.MouseEvent) => {
-    if (!card.product) return
+  // Drag handlers
+  const handleDragStart = useCallback((cardId: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    const card = cards.find(c => c.id === cardId)
+    if (!card) return
 
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+    setDraggingCardId(cardId)
+    dragStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      cardX: card.x,
+      cardY: card.y,
+    }
+  }, [cards])
 
-    hoverTimeoutRef.current = setTimeout(() => {
-      setActiveProduct({
-        product: card.product!,
-        position: { x: e.clientX, y: e.clientY },
-        cardId: card.id,
-      })
-    }, 400) // Shorter delay for product cards
+  const handleDragMove = useCallback((e: MouseEvent) => {
+    if (!draggingCardId || !dragStartRef.current) return
+
+    const containerRect = containerRef.current?.getBoundingClientRect()
+    if (!containerRect) return
+
+    const galleryWidth = containerRect.width * (1 - writingPaneWidth / 100)
+    const deltaX = e.clientX - dragStartRef.current.x
+    const deltaY = e.clientY - dragStartRef.current.y
+
+    // Convert pixel delta to percentage (relative to gallery area)
+    const deltaXPercent = (deltaX / galleryWidth) * 100
+
+    setCards(prev => prev.map(card => {
+      if (card.id !== draggingCardId) return card
+
+      let newX = dragStartRef.current!.cardX + deltaXPercent
+      let newY = dragStartRef.current!.cardY + deltaY + scrollOffset - scrollOffsetRef.current
+
+      // Clamp to hard boundaries
+      newX = Math.max(12, Math.min(88, newX))
+
+      return {
+        ...card,
+        x: newX,
+        y: newY,
+        vx: 0,
+        vy: 0,
+      }
+    }))
+  }, [draggingCardId, writingPaneWidth, scrollOffset])
+
+  const handleDragEnd = useCallback(() => {
+    setDraggingCardId(null)
+    dragStartRef.current = null
   }, [])
+
+  // Add global mouse listeners for drag
+  useEffect(() => {
+    if (draggingCardId) {
+      window.addEventListener('mousemove', handleDragMove)
+      window.addEventListener('mouseup', handleDragEnd)
+      return () => {
+        window.removeEventListener('mousemove', handleDragMove)
+        window.removeEventListener('mouseup', handleDragEnd)
+      }
+    }
+  }, [draggingCardId, handleDragMove, handleDragEnd])
 
   // Shopping handlers
   const handleAddToBag = useCallback((product: Product) => {
@@ -538,7 +753,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     localStorage.setItem('consumer-writing-pane-width', writingPaneWidth.toString())
   }, [writingPaneWidth])
 
-  // Scroll indicator position (0-1)
+  // Scroll indicator position
   const scrollIndicatorPos = totalHeight > 0 ? scrollOffset / Math.max(1, totalHeight - window.innerHeight) : 0
 
   // Filter visible cards
@@ -546,7 +761,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
   const visibleCards = cards.filter(card => {
     if (card.isExpanded) return true
     const visibleY = getVisibleY(card.y)
-    return visibleY > -card.height && visibleY < viewportHeight + card.height
+    return visibleY > -card.height - 100 && visibleY < viewportHeight + 100
   })
 
   return (
@@ -589,7 +804,6 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
           const finalOpacity = card.opacity * fadeOpacity
 
           if (card.isExpanded) {
-            // Expanded view - takes right 2/3 of screen
             return (
               <div
                 key={card.id}
@@ -599,24 +813,15 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                 <div
                   className="expanded-card"
                   onClick={e => e.stopPropagation()}
+                  onMouseMove={e => handleCardMouseMove(card, e)}
+                  onMouseLeave={() => handleCardMouseLeave(card.id)}
                 >
                   <img
-                    src={card.imageUrl}
+                    src={card.galleryItem.sceneUrl}
                     alt=""
                     className="expanded-card-image"
-                    onMouseMove={e => card.product && handleProductHover(card, e)}
                   />
-                  {card.product && (
-                    <div className="expanded-product-hint">
-                      Hover over the product for details
-                    </div>
-                  )}
-                  <button
-                    className="expanded-close-btn"
-                    onClick={() => handleCardDoubleClick(card.id)}
-                  >
-                    ✕
-                  </button>
+                  <div className="expanded-esc-hint">esc</div>
                 </div>
               </div>
             )
@@ -628,7 +833,8 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
               className={clsx(
                 'gallery-card',
                 card.isHovered && 'hovered',
-                card.product && 'has-product'
+                isOverProduct && card.isHovered && 'over-product',
+                draggingCardId === card.id && 'dragging'
               )}
               style={{
                 left: `${card.x}%`,
@@ -636,22 +842,24 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                 width: card.width,
                 height: card.height,
                 opacity: finalOpacity,
-                transform: `translate(-50%, 0) scale(${card.isHovered ? 1.02 : card.scale})`,
+                transform: `translate(-50%, 0) scale(${draggingCardId === card.id ? 1.05 : card.isHovered ? 1.02 : card.scale})`,
+                zIndex: draggingCardId === card.id ? 100 : undefined,
+                cursor: draggingCardId === card.id ? 'grabbing' : 'grab',
               }}
               onMouseEnter={() => handleCardMouseEnter(card.id)}
               onMouseLeave={() => handleCardMouseLeave(card.id)}
               onDoubleClick={() => handleCardDoubleClick(card.id)}
-              onMouseMove={e => card.product && card.isHovered && handleProductHover(card, e)}
+              onMouseMove={e => handleCardMouseMove(card, e)}
+              onMouseDown={e => handleDragStart(card.id, e)}
             >
               <img
-                src={card.imageUrl}
+                src={card.galleryItem.sceneUrl}
                 alt=""
                 className="gallery-card-image"
                 loading="lazy"
+                draggable={false}
               />
-              {card.product && (
-                <div className="product-badge">{card.product.brand}</div>
-              )}
+              <div className="product-badge">{card.galleryItem.product.brand}</div>
             </div>
           )
         })}
@@ -722,7 +930,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
       {/* Debug mode indicator */}
       {debugMode && (
         <div className="debug-badge">
-          Debug | Scroll: {Math.round(scrollOffset)} | Cards: {cards.length}
+          Debug | Scroll: {Math.round(scrollOffset)} | Cards: {cards.length} | Over Product: {isOverProduct ? 'Yes' : 'No'}
         </div>
       )}
     </div>
