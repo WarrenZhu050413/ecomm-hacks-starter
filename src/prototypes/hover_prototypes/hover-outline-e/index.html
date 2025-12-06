@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Trace - Modern Product Gallery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #1A1A1A;
+            --bg-light: #FAF8F3;
+            --text-dark: #FAFAFA;
+            --text-light: #1A1A1A;
+            --accent-blue: #4A9EFF;
+            --accent-gold: #D4AF37;
+            --card-dark: #252525;
+            --card-light: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body.light-mode {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 1000;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-dark);
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        body.light-mode .theme-toggle {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--text-light);
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .accent-toggle {
+            background: var(--accent-blue);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        body.gold-accent .accent-toggle {
+            background: var(--accent-gold);
+        }
+
+        .accent-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 120px 20px 60px;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            font-weight: 300;
+            opacity: 0.7;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Gallery Grid */
+        .gallery {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 60px;
+        }
+
+        /* Product Card */
+        .product-card {
+            position: relative;
+            cursor: pointer;
+            overflow: visible;
+        }
+
+        .product-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3/4;
+            background: var(--card-dark);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .product-wrapper {
+            background: var(--card-light);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* SVG Outline */
+        .trace-outline {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: calc(100% + 20px);
+            height: calc(100% + 20px);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .product-card.tracing .trace-outline {
+            opacity: 1;
+        }
+
+        .trace-path {
+            fill: none;
+            stroke: var(--accent-blue);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 10px currentColor);
+            stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+        }
+
+        body.gold-accent .trace-path {
+            stroke: var(--accent-gold);
+        }
+
+        body.light-mode .trace-path {
+            stroke: var(--accent-blue);
+            filter: drop-shadow(0 0 8px rgba(74, 158, 255, 0.4));
+        }
+
+        body.light-mode.gold-accent .trace-path {
+            stroke: var(--accent-gold);
+            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+        }
+
+        .product-card.tracing .trace-path {
+            animation: trace 0.6s ease-out forwards;
+        }
+
+        .product-card.traced .trace-path {
+            stroke-dashoffset: 0;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes trace {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                filter: drop-shadow(0 0 10px currentColor);
+            }
+            50% {
+                opacity: 0.6;
+                filter: drop-shadow(0 0 20px currentColor);
+            }
+        }
+
+        /* Product Info Card */
+        .product-info {
+            position: absolute;
+            bottom: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-dark);
+            padding: 30px;
+            border-radius: 12px;
+            min-width: 300px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        body.light-mode .product-info {
+            background: var(--card-light);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card.traced .product-info {
+            opacity: 1;
+            bottom: -140px;
+            pointer-events: auto;
+        }
+
+        .product-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .product-category {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        .product-price {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+        }
+
+        body.gold-accent .product-price {
+            color: var(--accent-gold);
+        }
+
+        .product-description {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.8;
+            margin-bottom: 24px;
+        }
+
+        .cta-button {
+            width: 100%;
+            padding: 14px 28px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        body.gold-accent .cta-button {
+            background: var(--accent-gold);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 80px 20px 40px;
+            opacity: 0.5;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 100px;
+            }
+
+            nav {
+                top: 20px;
+                right: 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .product-info {
+                min-width: 260px;
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+        <button class="accent-toggle" onclick="toggleAccent()">Toggle Accent</button>
+    </nav>
+
+    <header>
+        <h1>Neon Trace</h1>
+        <p class="subtitle">Modern gallery experience with animated product discovery</p>
+    </header>
+
+    <div class="gallery" id="gallery">
+        <!-- Products will be generated by JavaScript -->
+    </div>
+
+    <footer>
+        <p>Hover over any product to reveal details</p>
+    </footer>
+
+    <script>
+        // Sample product data
+        const products = [
+            {
+                name: "Minimal Watch",
+                category: "Accessories",
+                price: "$299",
+                description: "Precision meets elegance in this contemporary timepiece with Swiss movement.",
+                image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=800&fit=crop"
+            },
+            {
+                name: "Leather Backpack",
+                category: "Bags",
+                price: "$189",
+                description: "Handcrafted Italian leather backpack designed for the modern traveler.",
+                image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=800&fit=crop"
+            },
+            {
+                name: "Designer Sunglasses",
+                category: "Eyewear",
+                price: "$249",
+                description: "Polarized lenses with titanium frame. UV400 protection included.",
+                image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600&h=800&fit=crop"
+            },
+            {
+                name: "Wireless Earbuds",
+                category: "Audio",
+                price: "$179",
+                description: "Premium sound quality with active noise cancellation and 24-hour battery.",
+                image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&h=800&fit=crop"
+            },
+            {
+                name: "Canvas Sneakers",
+                category: "Footwear",
+                price: "$129",
+                description: "Sustainable materials meet timeless design in these versatile sneakers.",
+                image: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=600&h=800&fit=crop"
+            },
+            {
+                name: "Silk Scarf",
+                category: "Accessories",
+                price: "$89",
+                description: "Hand-printed pure silk scarf with contemporary geometric patterns.",
+                image: "https://images.unsplash.com/photo-1601924287988-99f3e2c3e7de?w=600&h=800&fit=crop"
+            }
+        ];
+
+        // Generate product cards
+        const gallery = document.getElementById('gallery');
+
+        products.forEach((product, index) => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="product-wrapper">
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <svg class="trace-outline" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <path class="trace-path" d="M 5,5 L 95,5 L 95,95 L 5,95 Z" />
+                    </svg>
+                </div>
+                <div class="product-info">
+                    <div class="product-category">${product.category}</div>
+                    <h3 class="product-name">${product.name}</h3>
+                    <div class="product-price">${product.price}</div>
+                    <p class="product-description">${product.description}</p>
+                    <button class="cta-button">Add to Cart</button>
+                </div>
+            `;
+            gallery.appendChild(card);
+        });
+
+        // Hover interaction with delay
+        let hoverTimeouts = new Map();
+
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const timeoutId = setTimeout(() => {
+                    this.classList.add('tracing');
+
+                    // After trace animation completes, add traced class
+                    setTimeout(() => {
+                        this.classList.add('traced');
+                    }, 600);
+                }, 400);
+
+                hoverTimeouts.set(this, timeoutId);
+            });
+
+            card.addEventListener('mouseleave', function() {
+                // Clear timeout if mouse leaves before delay completes
+                const timeoutId = hoverTimeouts.get(this);
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    hoverTimeouts.delete(this);
+                }
+
+                this.classList.remove('tracing', 'traced');
+
+                // Reset animation
+                const path = this.querySelector('.trace-path');
+                path.style.animation = 'none';
+                setTimeout(() => {
+                    path.style.animation = '';
+                }, 10);
+            });
+        });
+
+        // Theme toggle
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+        }
+
+        // Accent color toggle
+        function toggleAccent() {
+            document.body.classList.toggle('gold-accent');
+        }
+
+        // Add button click handlers
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('cta-button')) {
+                e.stopPropagation();
+                const productName = e.target.closest('.product-info').querySelector('.product-name').textContent;
+                alert(`Added "${productName}" to cart!`);
+            }
+        });
+    </script>
+</body>
+</html>

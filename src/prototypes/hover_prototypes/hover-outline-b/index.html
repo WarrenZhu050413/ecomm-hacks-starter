@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crépuscule - Twilight Glow Shopping</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Work+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --twilight-amber: #C9956B;
+            --twilight-rose: #D4A5A5;
+            --twilight-blue: #2E4A62;
+            --warm-white: rgba(255, 248, 230, 0.9);
+            --golden-glow: rgba(255, 215, 140, 0.6);
+            --outline-color: rgba(255, 248, 230, 0.95);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: linear-gradient(180deg, var(--twilight-amber) 0%, var(--twilight-rose) 50%, var(--twilight-blue) 100%);
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Film grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 9999;
+            animation: grain 8s steps(10) infinite;
+        }
+
+        @keyframes grain {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -10%); }
+            20% { transform: translate(-15%, 5%); }
+            30% { transform: translate(7%, -25%); }
+            40% { transform: translate(-5%, 25%); }
+            50% { transform: translate(-15%, 10%); }
+            60% { transform: translate(15%, 0%); }
+            70% { transform: translate(0%, 15%); }
+            80% { transform: translate(3%, 35%); }
+            90% { transform: translate(-10%, 10%); }
+        }
+
+        /* Hero section */
+        .hero {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.85) contrast(1.05) sepia(0.15);
+            transition: filter 0.6s ease;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.3) 100%);
+            pointer-events: none;
+        }
+
+        /* Header */
+        header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem 3rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--warm-white);
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            letter-spacing: 0.05em;
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--warm-white);
+            text-decoration: none;
+            font-weight: 300;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--golden-glow);
+            text-shadow: 0 0 20px var(--golden-glow);
+        }
+
+        /* Product hotspots */
+        .product-hotspot {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .product-area {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .product-area::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            pointer-events: none;
+        }
+
+        .product-hotspot:hover .product-area::before {
+            opacity: 1;
+            box-shadow:
+                0 0 20px 4px var(--outline-color),
+                0 0 40px 8px var(--golden-glow),
+                0 0 60px 12px rgba(255, 215, 140, 0.3),
+                inset 0 0 20px 2px var(--outline-color);
+            animation: twilightGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes twilightGlow {
+            0%, 100% {
+                box-shadow:
+                    0 0 20px 4px var(--outline-color),
+                    0 0 40px 8px var(--golden-glow),
+                    0 0 60px 12px rgba(255, 215, 140, 0.3),
+                    inset 0 0 20px 2px var(--outline-color);
+            }
+            50% {
+                box-shadow:
+                    0 0 30px 6px var(--outline-color),
+                    0 0 50px 12px var(--golden-glow),
+                    0 0 80px 16px rgba(255, 215, 140, 0.4),
+                    inset 0 0 30px 3px var(--outline-color);
+            }
+        }
+
+        .product-hotspot:hover .hero-image {
+            filter: brightness(0.6) contrast(1.05) sepia(0.15);
+        }
+
+        /* Product info tooltip */
+        .product-info {
+            position: absolute;
+            bottom: -100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 248, 230, 0.1);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(255, 248, 230, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            min-width: 280px;
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition-delay: 0.8s;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 248, 230, 0.1);
+            z-index: 10;
+            text-align: center;
+        }
+
+        .product-hotspot:hover .product-info {
+            bottom: -140px;
+            opacity: 1;
+        }
+
+        .product-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--golden-glow);
+            margin-bottom: 0.5rem;
+        }
+
+        .product-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--warm-white);
+            margin-bottom: 0.75rem;
+            line-height: 1.3;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            color: rgba(255, 248, 230, 0.9);
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+
+        .shop-link {
+            display: inline-block;
+            color: var(--warm-white);
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.5rem 1.5rem;
+            border: 1px solid rgba(255, 248, 230, 0.3);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .shop-link:hover {
+            background: var(--golden-glow);
+            border-color: var(--golden-glow);
+            color: var(--twilight-blue);
+            box-shadow: 0 0 20px var(--golden-glow);
+        }
+
+        /* Hero title */
+        .hero-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .hero-title h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            font-weight: 700;
+            color: var(--warm-white);
+            text-shadow: 0 4px 40px rgba(0,0,0,0.5);
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title p {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: rgba(255, 248, 230, 0.9);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+        }
+
+        /* Gallery section */
+        .gallery-section {
+            padding: 4rem 3rem;
+            position: relative;
+        }
+
+        .gallery-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--warm-white);
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+        }
+
+        .gallery-scroll {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--golden-glow) transparent;
+        }
+
+        .gallery-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .gallery-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 248, 230, 0.1);
+            border-radius: 4px;
+        }
+
+        .gallery-scroll::-webkit-scrollbar-thumb {
+            background: var(--golden-glow);
+            border-radius: 4px;
+        }
+
+        .gallery-item {
+            flex: 0 0 400px;
+            height: 500px;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.02);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.85) contrast(1.05) sepia(0.15);
+        }
+
+        .gallery-item-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 2rem;
+            color: var(--warm-white);
+        }
+
+        .gallery-item-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .gallery-item-desc {
+            font-size: 0.9rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-indicator span {
+            display: block;
+            width: 24px;
+            height: 40px;
+            border: 2px solid var(--warm-white);
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .scroll-indicator span::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 8px;
+            background: var(--warm-white);
+            border-radius: 2px;
+            animation: scroll 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        @keyframes scroll {
+            0% { opacity: 0; transform: translateX(-50%) translateY(0); }
+            40% { opacity: 1; }
+            80% { opacity: 0; transform: translateX(-50%) translateY(12px); }
+            100% { opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title h1 {
+                font-size: 3rem;
+            }
+
+            .gallery-item {
+                flex: 0 0 300px;
+                height: 400px;
+            }
+
+            header {
+                padding: 1.5rem;
+            }
+
+            nav {
+                gap: 1rem;
+            }
+
+            nav a {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Crépuscule</div>
+        <nav>
+            <a href="#">Collections</a>
+            <a href="#">Stories</a>
+            <a href="#">About</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <img src="https://images.unsplash.com/photo-1558769132-cb1aea3c8565?w=1920&q=80" alt="Parisian café at twilight" class="hero-image">
+        <div class="hero-overlay"></div>
+
+        <div class="hero-title">
+            <h1>Crépuscule</h1>
+            <p>Golden Hour Elegance</p>
+        </div>
+
+        <!-- Product hotspot 1: Handbag -->
+        <div class="product-hotspot" style="top: 45%; left: 35%; width: 180px; height: 160px;">
+            <div class="product-area">
+                <div class="product-info">
+                    <div class="product-brand">Maison Claire</div>
+                    <div class="product-name">Sunset Leather Tote</div>
+                    <div class="product-price">$485</div>
+                    <a href="#" class="shop-link">Shop Now</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product hotspot 2: Watch -->
+        <div class="product-hotspot" style="top: 35%; right: 30%; width: 140px; height: 140px;">
+            <div class="product-area">
+                <div class="product-info">
+                    <div class="product-brand">Temps d'Or</div>
+                    <div class="product-name">Classic Rose Gold</div>
+                    <div class="product-price">$1,250</div>
+                    <a href="#" class="shop-link">Shop Now</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product hotspot 3: Sunglasses -->
+        <div class="product-hotspot" style="top: 25%; left: 25%; width: 160px; height: 100px;">
+            <div class="product-area">
+                <div class="product-info">
+                    <div class="product-brand">Vue Dorée</div>
+                    <div class="product-name">Amber Aviators</div>
+                    <div class="product-price">$320</div>
+                    <a href="#" class="shop-link">Shop Now</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product hotspot 4: Coffee cup -->
+        <div class="product-hotspot" style="bottom: 25%; left: 40%; width: 120px; height: 140px;">
+            <div class="product-area">
+                <div class="product-info">
+                    <div class="product-brand">Café Luxe</div>
+                    <div class="product-name">Porcelain Set</div>
+                    <div class="product-price">$95</div>
+                    <a href="#" class="shop-link">Shop Now</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </section>
+
+    <section class="gallery-section">
+        <h2 class="gallery-title">Discover More Scenes</h2>
+        <div class="gallery-scroll">
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80" alt="Fashion scene">
+                <div class="gallery-item-overlay">
+                    <div class="gallery-item-title">Autumn Collection</div>
+                    <div class="gallery-item-desc">Warm tones for cooler days</div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80" alt="Fashion scene">
+                <div class="gallery-item-overlay">
+                    <div class="gallery-item-title">Evening Elegance</div>
+                    <div class="gallery-item-desc">Timeless sophistication</div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80" alt="Fashion scene">
+                <div class="gallery-item-overlay">
+                    <div class="gallery-item-title">Boutique Essentials</div>
+                    <div class="gallery-item-desc">Curated selections</div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80" alt="Fashion scene">
+                <div class="gallery-item-overlay">
+                    <div class="gallery-item-title">Street Style</div>
+                    <div class="gallery-item-desc">Urban inspiration</div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80" alt="Fashion scene">
+                <div class="gallery-item-overlay">
+                    <div class="gallery-item-title">Weekend Casual</div>
+                    <div class="gallery-item-desc">Effortless comfort</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Add hover delay for product hotspots
+        const hotspots = document.querySelectorAll('.product-hotspot');
+
+        hotspots.forEach(hotspot => {
+            let hoverTimer;
+
+            hotspot.addEventListener('mouseenter', function() {
+                // Clear any existing timer
+                clearTimeout(hoverTimer);
+
+                // Set a delay before showing the effect
+                hoverTimer = setTimeout(() => {
+                    this.classList.add('active');
+                }, 800);
+            });
+
+            hotspot.addEventListener('mouseleave', function() {
+                // Clear timer if mouse leaves before delay completes
+                clearTimeout(hoverTimer);
+                this.classList.remove('active');
+            });
+        });
+
+        // Smooth parallax effect
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero-image');
+            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+        });
+
+        // Gallery scroll hint
+        const galleryScroll = document.querySelector('.gallery-scroll');
+        let scrollTimeout;
+
+        galleryScroll.addEventListener('scroll', () => {
+            galleryScroll.style.cursor = 'grabbing';
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                galleryScroll.style.cursor = 'grab';
+            }, 150);
+        });
+    </script>
+</body>
+</html>
