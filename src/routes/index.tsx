@@ -15,6 +15,8 @@ import { NewSessionRoute } from './NewSessionRoute'
 import { CanvasRoute } from './CanvasRoute'
 import { NotFound } from './NotFound'
 import DraftingTable from '@/prototypes/paris-drafting-table/DraftingTable'
+import DraftingTableV2 from '@/prototypes/paris-drafting-table/DraftingTableV2'
+import { ProductPlacement } from '@/console'
 
 export const router = createBrowserRouter([
   {
@@ -22,8 +24,16 @@ export const router = createBrowserRouter([
     element: <OnboardingFlow />,
   },
   {
+    path: '/console',
+    element: <ProductPlacement />,
+  },
+  {
     path: '/prototype',
     element: <DraftingTable />,
+  },
+  {
+    path: '/prototype/v2',
+    element: <DraftingTableV2 />,
   },
   {
     path: '/:configSlug',

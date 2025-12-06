@@ -35,37 +35,37 @@ interface PlacementResult {
   timestamp: Date
 }
 
-// Sample products (placeholders - will be replaced with generated images)
-const SAMPLE_PRODUCTS: Product[] = [
-  { id: 'prada-1', name: 'Saffiano Leather Bag', brand: 'Prada', imageUrl: '', description: 'Classic black saffiano leather handbag' },
-  { id: 'prada-2', name: 'Re-Nylon Backpack', brand: 'Prada', imageUrl: '', description: 'Regenerated nylon backpack' },
-  { id: 'prada-3', name: 'Triangle Logo Sunglasses', brand: 'Prada', imageUrl: '', description: 'Acetate sunglasses with iconic triangle' },
-  { id: 'lv-1', name: 'Neverfull MM', brand: 'Louis Vuitton', imageUrl: '', description: 'Monogram canvas tote bag' },
-  { id: 'lv-2', name: 'Keepall 45', brand: 'Louis Vuitton', imageUrl: '', description: 'Iconic travel duffle' },
-  { id: 'lv-3', name: 'Capucines Mini', brand: 'Louis Vuitton', imageUrl: '', description: 'Refined leather handbag' },
-  { id: 'acne-1', name: 'Musubi Bag', brand: 'Acne Studios', imageUrl: '', description: 'Knotted leather shoulder bag' },
-  { id: 'acne-2', name: 'Oversized Wool Scarf', brand: 'Acne Studios', imageUrl: '', description: 'Chunky knit wool scarf' },
-  { id: 'acne-3', name: 'Jensen Boots', brand: 'Acne Studios', imageUrl: '', description: 'Pointed toe ankle boots' },
+// Pre-generated products (via Nano Banana Pro)
+const PRELOADED_PRODUCTS: Product[] = [
+  { id: 'prada-1', name: 'Saffiano Leather Bag', brand: 'Prada', imageUrl: '/prototype-assets/products/prada-1.jpg', description: 'Classic black saffiano leather handbag' },
+  { id: 'prada-2', name: 'Re-Nylon Backpack', brand: 'Prada', imageUrl: '/prototype-assets/products/prada-2.jpg', description: 'Regenerated nylon backpack' },
+  { id: 'prada-3', name: 'Triangle Logo Sunglasses', brand: 'Prada', imageUrl: '/prototype-assets/products/prada-3.jpg', description: 'Acetate sunglasses with iconic triangle' },
+  { id: 'lv-1', name: 'Neverfull MM', brand: 'Louis Vuitton', imageUrl: '/prototype-assets/products/lv-1.jpg', description: 'Monogram canvas tote bag' },
+  { id: 'lv-2', name: 'Keepall 45', brand: 'Louis Vuitton', imageUrl: '/prototype-assets/products/lv-2.jpg', description: 'Iconic travel duffle' },
+  { id: 'lv-3', name: 'Capucines Mini', brand: 'Louis Vuitton', imageUrl: '/prototype-assets/products/lv-3.jpg', description: 'Refined leather handbag' },
+  { id: 'acne-1', name: 'Musubi Bag', brand: 'Acne Studios', imageUrl: '/prototype-assets/products/acne-1.jpg', description: 'Knotted leather shoulder bag' },
+  { id: 'acne-2', name: 'Oversized Wool Scarf', brand: 'Acne Studios', imageUrl: '/prototype-assets/products/acne-2.jpg', description: 'Chunky knit wool scarf' },
+  { id: 'acne-3', name: 'Jensen Boots', brand: 'Acne Studios', imageUrl: '/prototype-assets/products/acne-3.jpg', description: 'Pointed toe ankle boots' },
 ]
 
-// Aesthetic prompts for base images
-const AESTHETIC_PROMPTS = [
-  'A Parisian cafe table at 4pm, golden afternoon light streaming through lace curtains, marble tabletop, empty espresso cup, film grain texture',
-  'Rain-streaked window in a Paris apartment, soft afternoon light, muted colors, impressionist mood, old books on windowsill',
-  'Cobblestone street in Le Marais, 4pm sunlight, cafe chairs, vintage aesthetic, warm amber tones, expired film look',
-  'Seine riverbank at golden hour, iron bridge silhouette, soft focus, romantic atmosphere, nostalgic mood',
-  'Vintage Parisian boutique interior, art deco mirrors, soft lighting, matte textures, sophisticated elegance',
-  'Tuileries Garden bench, autumn leaves, late afternoon shadows, warm terracotta tones, peaceful solitude',
-  'Montmartre artist studio, large windows, natural light, canvases and brushes, creative atmosphere',
-  'Left Bank bookshop, stacked leather-bound volumes, dust motes in sunlight, timeless intellectual charm',
-  'Palais Royal gardens at dusk, columns and fountains, blue hour approaching, refined tranquility',
-  'Parisian rooftop terrace, zinc surfaces, chimney pots, distant Eiffel Tower, romantic evening light',
+// Pre-generated Paris aesthetic images (via Nano Banana Pro)
+const PRELOADED_AESTHETICS: AestheticImage[] = [
+  { id: 'cafe-table', url: '/prototype-assets/aesthetics/cafe-table.jpg', description: 'Parisian cafe table at 4pm golden hour, warm afternoon light, marble tabletop' },
+  { id: 'rain-window', url: '/prototype-assets/aesthetics/rain-window.jpg', description: 'Rain-streaked window in Paris apartment, soft diffused light, old books' },
+  { id: 'cobblestone', url: '/prototype-assets/aesthetics/cobblestone.jpg', description: 'Cobblestone street in Le Marais, 4pm sunlight, vintage cafe chairs' },
+  { id: 'seine-bank', url: '/prototype-assets/aesthetics/seine-bank.jpg', description: 'Seine riverbank at golden hour, iron bridge silhouette, romantic mood' },
+  { id: 'boutique', url: '/prototype-assets/aesthetics/boutique.jpg', description: 'Vintage Parisian boutique interior, art deco mirrors, soft warm lighting' },
+  { id: 'tuileries', url: '/prototype-assets/aesthetics/tuileries.jpg', description: 'Tuileries Garden bench in autumn, fallen leaves, late afternoon shadows' },
+  { id: 'artist-studio', url: '/prototype-assets/aesthetics/artist-studio.jpg', description: 'Montmartre artist studio, large windows, natural afternoon light' },
+  { id: 'bookshop', url: '/prototype-assets/aesthetics/bookshop.jpg', description: 'Left Bank bookshop, leather-bound volumes, dust motes in golden sunlight' },
+  { id: 'palais-royal', url: '/prototype-assets/aesthetics/palais-royal.jpg', description: 'Palais Royal gardens at blue hour, classical columns, elegant tranquility' },
+  { id: 'rooftop', url: '/prototype-assets/aesthetics/rooftop.jpg', description: 'Parisian rooftop terrace, zinc surfaces, distant Eiffel Tower' },
 ]
 
 export default function DraftingTable() {
-  // State
-  const [products, setProducts] = useState<Product[]>(SAMPLE_PRODUCTS)
-  const [aestheticImages, setAestheticImages] = useState<AestheticImage[]>([])
+  // State - initialized with pre-generated images
+  const [products, setProducts] = useState<Product[]>(PRELOADED_PRODUCTS)
+  const [aestheticImages, setAestheticImages] = useState<AestheticImage[]>(PRELOADED_AESTHETICS)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [selectedAesthetic, setSelectedAesthetic] = useState<AestheticImage | null>(null)
   const [placementPrompt, setPlacementPrompt] = useState('')
@@ -166,6 +166,32 @@ export default function DraftingTable() {
     setIsGeneratingAesthetics(false)
   }, [])
 
+  // Helper to convert image URL to base64
+  const urlToBase64 = async (url: string): Promise<{ base64: string; mimeType: string }> => {
+    // If already a data URL, extract parts
+    if (url.startsWith('data:')) {
+      const mimeType = url.split(';')[0].split(':')[1]
+      const base64 = url.split(',')[1]
+      return { base64, mimeType }
+    }
+
+    // Fetch the image and convert to base64
+    const response = await fetch(url)
+    const blob = await response.blob()
+    const mimeType = blob.type || 'image/jpeg'
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string
+        const base64 = dataUrl.split(',')[1]
+        resolve({ base64, mimeType })
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
+  }
+
   // Place product into aesthetic image
   const placeProduct = useCallback(async () => {
     if (!selectedProduct || !selectedAesthetic) {
@@ -177,9 +203,8 @@ export default function DraftingTable() {
     setError(null)
 
     try {
-      // Extract base64 data from the aesthetic image URL
-      const aestheticBase64 = selectedAesthetic.url.split(',')[1]
-      const mimeType = selectedAesthetic.url.split(';')[0].split(':')[1]
+      // Convert aesthetic image to base64 (handles both data URLs and file paths)
+      const { base64: aestheticBase64, mimeType } = await urlToBase64(selectedAesthetic.url)
 
       // Build the placement prompt
       const fullPrompt = placementPrompt

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ephemeral Product Reveal v3</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #08080a;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 50px 24px;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; }
+
+        h1 { font-size: 28px; font-weight: 600; margin-bottom: 10px; text-align: center; }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            font-size: 14px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .principle {
+            background: rgba(34,197,94,0.08);
+            border: 1px solid rgba(34,197,94,0.2);
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+        }
+
+        .principle strong { color: #22c55e; }
+
+        .variants { display: flex; flex-direction: column; gap: 12px; }
+
+        .variant {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .variant:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.12);
+            transform: translateX(3px);
+        }
+
+        .variant-letter {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .variant-info { flex: 1; }
+        .variant-name { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+        .variant-desc { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+        .variant-timing {
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.04);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 6px;
+            display: inline-block;
+        }
+
+        .variant-arrow {
+            color: rgba(255,255,255,0.2);
+            font-size: 18px;
+        }
+
+        .variant:hover .variant-arrow { color: rgba(255,255,255,0.5); }
+
+        .summary {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+        }
+
+        .summary h3 {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 14px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .summary-item {
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+        }
+
+        .summary-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255,255,255,0.35);
+            margin-bottom: 4px;
+        }
+
+        .summary-value {
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ephemeral Product Reveal</h1>
+        <p class="subtitle">
+            Save triggers a temporary window for product discovery.<br>
+            Hover to lock — or let them fade naturally. No pressure.
+        </p>
+
+        <div class="principle">
+            <strong>Core Idea:</strong> Products appear briefly after save, then disappear unless the user engages.
+            On the edge between visible and invisible.
+        </div>
+
+        <div class="variants">
+            <a href="variant-a-ephemeral-glow.html" class="variant">
+                <div class="variant-letter">A</div>
+                <div class="variant-info">
+                    <div class="variant-name">Ephemeral Glow</div>
+                    <div class="variant-desc">Outlines glow for 5 seconds with a timer bar. Hover to lock. Clean and clear.</div>
+                    <div class="variant-timing">5 sec window</div>
+                </div>
+                <span class="variant-arrow">→</span>
+            </a>
+
+            <a href="variant-b-pulse-once.html" class="variant">
+                <div class="variant-letter">B</div>
+                <div class="variant-info">
+                    <div class="variant-name">Pulse Once</div>
+                    <div class="variant-desc">Single pulse animation. Catch it or miss it — one chance, no lingering.</div>
+                    <div class="variant-timing">~1.2 sec flash</div>
+                </div>
+                <span class="variant-arrow">→</span>
+            </a>
+
+            <a href="variant-c-gradual-fade.html" class="variant">
+                <div class="variant-letter">C</div>
+                <div class="variant-info">
+                    <div class="variant-name">Gradual Fade</div>
+                    <div class="variant-desc">Starts visible (60%), slowly fades over 8 seconds. Hover pauses, click locks.</div>
+                    <div class="variant-timing">8 sec decay</div>
+                </div>
+                <span class="variant-arrow">→</span>
+            </a>
+
+            <a href="variant-d-focus-expand.html" class="variant">
+                <div class="variant-letter">D</div>
+                <div class="variant-info">
+                    <div class="variant-name">Focus Expand</div>
+                    <div class="variant-desc">Card expands into focus mode revealing products. Auto-closes after 6 sec.</div>
+                    <div class="variant-timing">6 sec focus</div>
+                </div>
+                <span class="variant-arrow">→</span>
+            </a>
+
+            <a href="variant-e-shimmer.html" class="variant">
+                <div class="variant-letter">E</div>
+                <div class="variant-info">
+                    <div class="variant-name">Shimmer Reveal</div>
+                    <div class="variant-desc">Light sweeps across, briefly illuminating products. They pulse subtly after, then fade.</div>
+                    <div class="variant-timing">1.5 sec sweep + 4 sec glow</div>
+                </div>
+                <span class="variant-arrow">→</span>
+            </a>
+        </div>
+
+        <div class="summary">
+            <h3>Shared Mechanics</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">Trigger</div>
+                    <div class="summary-value">Save/Pin action</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Lock Mechanism</div>
+                    <div class="summary-value">Hover during reveal</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Default Outcome</div>
+                    <div class="summary-value">Products fade away</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Feeling</div>
+                    <div class="summary-value">Opportunity, not pitch</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
