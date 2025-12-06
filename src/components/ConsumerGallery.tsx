@@ -1160,18 +1160,20 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                   onMouseMove={e => handleCardMouseMove(card, e)}
                   onMouseLeave={() => handleCardMouseLeave(card.id)}
                 >
-                  {/* Base layer: original scene without product */}
-                  <img
-                    src={card.galleryItem.baseUrl}
-                    alt=""
-                    className="expanded-card-image expanded-card-base"
-                  />
-                  {/* Top layer: scene with product - fades out when product removed */}
+                  {/* Scene image with product */}
                   <img
                     src={card.galleryItem.sceneUrl}
                     alt=""
-                    className={`expanded-card-image expanded-card-scene ${removedProductCardIds.has(card.id) ? 'product-removed' : ''}`}
+                    className={`expanded-card-image ${removedProductCardIds.has(card.id) ? 'product-removed' : ''}`}
                   />
+                  {/* Base layer: shown when product is removed (crossfade) */}
+                  {removedProductCardIds.has(card.id) && (
+                    <img
+                      src={card.galleryItem.baseUrl}
+                      alt=""
+                      className="expanded-card-image expanded-card-base-revealed"
+                    />
+                  )}
                   {/* Product highlight overlay for expanded view */}
                   {!removedProductCardIds.has(card.id) && productHoverCardId === card.id && highlightDataUrlRefs.current.get(card.id) && (
                     <img
@@ -1180,7 +1182,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                       className="expanded-highlight-overlay"
                     />
                   )}
-                  {/* Revert button - shows when product is removed */}
+                  {/* Show Original Image button - shows when product is removed */}
                   {removedProductCardIds.has(card.id) && (
                     <button
                       className="revert-button"
@@ -1189,7 +1191,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                         handleRevertProduct(card.id, card.galleryItem.product.id)
                       }}
                     >
-                      revert
+                      Show Original Image
                     </button>
                   )}
                 </div>
@@ -1224,22 +1226,24 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
               onMouseDown={e => handleDragStart(card.id, e)}
               onClick={e => handleCardClick(card, e)}
             >
-              {/* Base layer: original scene without product */}
-              <img
-                src={card.galleryItem.baseUrl}
-                alt=""
-                className="gallery-card-image gallery-card-base"
-                loading="lazy"
-                draggable={false}
-              />
-              {/* Top layer: scene with product - fades out when product removed */}
+              {/* Scene image with product */}
               <img
                 src={card.galleryItem.sceneUrl}
                 alt=""
-                className={`gallery-card-image gallery-card-scene ${removedProductCardIds.has(card.id) ? 'product-removed' : ''}`}
+                className={`gallery-card-image ${removedProductCardIds.has(card.id) ? 'product-removed' : ''}`}
                 loading="lazy"
                 draggable={false}
               />
+              {/* Base layer: shown when product is removed (crossfade) */}
+              {removedProductCardIds.has(card.id) && (
+                <img
+                  src={card.galleryItem.baseUrl}
+                  alt=""
+                  className="gallery-card-image gallery-card-base-revealed"
+                  loading="lazy"
+                  draggable={false}
+                />
+              )}
               {/* Product highlight overlay - only visible when hovering over product area */}
               {!removedProductCardIds.has(card.id) && productHoverCardId === card.id && highlightDataUrlRefs.current.get(card.id) && (
                 <img
@@ -1248,7 +1252,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                   className="product-highlight-overlay"
                 />
               )}
-              {/* Revert button - shows when product is removed */}
+              {/* Show Original Image button - shows when product is removed */}
               {removedProductCardIds.has(card.id) && (
                 <button
                   className="revert-button"
@@ -1257,7 +1261,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                     handleRevertProduct(card.id, card.galleryItem.product.id)
                   }}
                 >
-                  revert
+                  Show Original Image
                 </button>
               )}
             </div>

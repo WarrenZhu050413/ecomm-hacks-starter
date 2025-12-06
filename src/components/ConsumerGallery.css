@@ -122,26 +122,23 @@
   display: block;
 }
 
-/* Layered image crossfade for product removal */
-.gallery-card-base {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  /* Base may have different aspect ratio - ensure it covers */
-  object-fit: cover;
-}
-
-.gallery-card-scene {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  transition: opacity 0.5s ease;
-  /* Ensure scene fully covers base - add background to prevent bleed-through */
-  background: #1a1815;
-}
-
-.gallery-card-scene.product-removed {
+/* Product removal crossfade */
+.gallery-card-image.product-removed {
   opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.gallery-card-base-revealed {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  object-fit: cover;
+  animation: fadeInBase 0.5s ease forwards;
+}
+
+@keyframes fadeInBase {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Expanded Card Overlay */
@@ -190,23 +187,18 @@
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
 }
 
-/* Layered image crossfade for expanded view */
-.expanded-card-base {
-  position: relative;
-  z-index: 0;
-  object-fit: contain;
+/* Product removal crossfade for expanded view */
+.expanded-card-image.product-removed {
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 
-.expanded-card-scene {
+.expanded-card-base-revealed {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  transition: opacity 0.5s ease;
-  background: #000;
-}
-
-.expanded-card-scene.product-removed {
-  opacity: 0;
+  z-index: -1;
+  object-fit: contain;
+  animation: fadeInBase 0.5s ease forwards;
 }
 
 /* Highlight overlay for expanded view - mask-based product tint */
