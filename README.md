@@ -87,26 +87,10 @@ uv run python test_product_integration.py
 
 ### Challenges We Faced
 
-1. **Getting precise masks from Nano Banana**: The model doesn't natively output segmentation masks. We solved this by prompting it to paint the product RED and everything else grayscale, then post-processing to extract red pixels as a binary mask.
-
-2. **Object-fit: cover misalignment**: When the scene image is cropped via CSS `object-fit: cover`, the mask coordinates don't match the displayed image. We calculate the crop offset to properly map mouse coordinates to mask pixels.
-
-3. **Hover state management**: Balancing hover-triggered popups with click-to-lock behavior required careful state management to avoid flickering and premature dismissals.
-
-4. **Model quota issues**: Initial models had quota limits; we switched to `gemini-2.5-flash-image` which worked reliably.
+- **Mask generation**: Nano Banana doesn't output segmentation masks natively. We prompt it to paint the product RED and the rest grayscale, then extract red pixels as a binary mask.
+- **Coordinate mapping**: CSS `object-fit: cover` crops images differently than the mask, requiring offset calculations for accurate hover detection.
 
 ### What's Next
 
-If we had more time, we would:
-
-1. **Build out the social network layer** - The real power of Reverie comes from network effects. With a user base creating and sharing mood boards, we could build a Pinterest-like platform where every image is potentially shoppable, creating a new paradigm for social commerce.
-
-2. **Personalized feed algorithms** - Use the writing pane input and browsing behavior to curate images that match each user's aesthetic preferences.
-
-3. **Advertiser console** - Full dashboard for brands to upload products, select target aesthetics, and track conversion metrics.
-
-4. **Real-time generation** - Stream scene generation so users see products appear in real-time as they describe their mood.
-
-5. **Multi-product scenes** - Support multiple products per image with independent hover zones.
-
-6. **Mobile optimization** - Touch-friendly interactions (long-press instead of hover).
+- **Social network layer**: Build a Pinterest-like platform where users create and share mood boards, with every image potentially shoppable—network effects driving social commerce.
+- **Personalized feeds**: Use writing pane input and browsing behavior to curate images matching each user's aesthetic.

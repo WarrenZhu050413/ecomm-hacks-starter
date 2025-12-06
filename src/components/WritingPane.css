@@ -47,11 +47,11 @@
 }
 
 .writing-pane-title {
-  font-family: 'Italiana', serif;
-  font-size: 1.6rem;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.5rem;
   font-weight: 400;
-  font-style: normal;
-  letter-spacing: 0.12em;
+  font-style: italic;
+  letter-spacing: 0.05em;
   color: var(--pane-title-color);
   opacity: 1;
 }
