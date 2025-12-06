@@ -7,6 +7,7 @@
  * - Add to Bag and Buy Now buttons side by side
  * - Smooth micro-animations
  * - "Suck into bag" animation when adding to bag
+ * - Loading animation and confirmation for Buy Now
  */
 
 import { useEffect, useRef, useState } from 'react'

@@ -1089,7 +1089,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
   }, [])
 
   const handleBuyNow = useCallback((product: Product) => {
-    // Direct add to bag without animation for Buy Now
+    // Add product to bag and show payment screen
     setBag(prev => {
       const existing = prev.find(item => item.product.id === product.id)
       if (existing) {
@@ -1103,18 +1103,8 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     })
     setActiveProduct(null)
     setProductClickLocked(false)
-
-    // 1-click checkout if payment info is saved
-    if (paymentInfo && paymentInfo.cardNumber) {
-      setPurchaseSuccess(true)
-      setBag([])
-      setTimeout(() => {
-        setPurchaseSuccess(false)
-      }, 3000)
-    } else {
-      setShowPayment(true)
-    }
-  }, [paymentInfo])
+    setShowPayment(true)
+  }, [])
 
   const handleRemoveFromBag = useCallback((productId: string) => {
     setBag(prev => prev.filter(item => item.product.id !== productId))
@@ -1279,7 +1269,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                 width: card.width,
                 height: card.height,
                 opacity: card.opacity,
-                transform: `translate(-50%, 0) scale(${draggingCardId === card.id ? 1.05 : card.isHovered ? 1.02 : card.scale})`,
+                transform: `translate(-50%, 0) scale(${draggingCardId === card.id ? 1.05 : (card.isHovered && productHoverCardId !== card.id) ? 1.02 : card.scale})`,
                 zIndex: draggingCardId === card.id ? 100 : undefined,
                 cursor: draggingCardId === card.id ? 'grabbing' : 'grab',
                 ...maskStyle,
@@ -1397,8 +1387,8 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
           onRemove={handleRemoveFromBag}
           onUpdateQuantity={handleUpdateQuantity}
           onCheckout={() => {
-            setShowBag(false)
-            setShowPayment(true)
+            // Clear the bag - checkout handled internally by ShoppingBag
+            setBag([])
           }}
           total={bagTotal}
         />
