@@ -1,0 +1,379 @@
+/**
+ * PaymentScreen - Full checkout screen styles
+ */
+
+.payment-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--cream);
+  z-index: 700;
+  overflow-y: auto;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+
+.payment-screen.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Header */
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid rgba(139, 115, 85, 0.1);
+  background: rgba(250, 248, 243, 0.95);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.payment-back {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: var(--sepia);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-left: -0.5rem;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.payment-back:hover {
+  background: rgba(139, 115, 85, 0.08);
+}
+
+.payment-back svg {
+  width: 18px;
+  height: 18px;
+}
+
+.payment-header h1 {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--pencil);
+  margin: 0;
+}
+
+.payment-secure {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #4a7c59;
+}
+
+.payment-secure svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Content */
+.payment-content {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 2.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+}
+
+@media (max-width: 900px) {
+  .payment-content {
+    grid-template-columns: 1fr;
+    padding: 1.5rem;
+  }
+}
+
+/* Order Summary */
+.order-summary {
+  background: rgba(139, 115, 85, 0.04);
+  border-radius: 16px;
+  padding: 1.5rem;
+  height: fit-content;
+}
+
+.order-summary h2 {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--pencil);
+  margin: 0 0 1.25rem;
+}
+
+.summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(139, 115, 85, 0.1);
+}
+
+.summary-item {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.summary-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.summary-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-item-brand {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sepia-light);
+}
+
+.summary-item-name {
+  font-family: 'Crimson Pro', serif;
+  font-size: 0.95rem;
+  color: var(--pencil);
+}
+
+.summary-item-qty {
+  font-size: 0.8rem;
+  color: var(--sepia-light);
+}
+
+.summary-item-price {
+  font-weight: 600;
+  color: var(--pencil);
+}
+
+.summary-total {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: var(--pencil);
+}
+
+.summary-row.total {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(139, 115, 85, 0.1);
+}
+
+/* Payment Form */
+.payment-form h2 {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--pencil);
+  margin: 0 0 1.5rem;
+}
+
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.form-section h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--sepia);
+  margin: 0 0 1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-field.full {
+  flex: 1 0 100%;
+}
+
+.form-field label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--pencil);
+}
+
+.form-field input,
+.form-field select {
+  padding: 0.85rem 1rem;
+  background: white;
+  border: 1px solid rgba(139, 115, 85, 0.2);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--pencil);
+  transition: all 0.2s ease;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: var(--sepia);
+  box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
+}
+
+.form-field input::placeholder {
+  color: var(--sepia-light);
+  opacity: 0.6;
+}
+
+/* Save Info Checkbox */
+.save-info-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  margin: 1.5rem 0;
+}
+
+.save-info-checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--pencil);
+}
+
+.save-info-checkbox span {
+  font-size: 0.9rem;
+  color: var(--pencil);
+}
+
+/* Purchase Button */
+.purchase-btn {
+  width: 100%;
+  padding: 1.1rem;
+  background: var(--vermillion);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.purchase-btn:hover:not(:disabled) {
+  background: var(--vermillion-dark);
+  transform: translateY(-1px);
+}
+
+.purchase-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.purchase-btn.processing {
+  background: var(--sepia);
+}
+
+.processing-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Success State */
+.payment-success {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  text-align: center;
+}
+
+.success-animation {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 1.5rem;
+}
+
+.success-checkmark {
+  width: 100%;
+  height: 100%;
+}
+
+.checkmark-circle {
+  stroke: #4a7c59;
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+  stroke: #4a7c59;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  stroke-width: 3;
+  stroke-linecap: round;
+  animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+}
+
+@keyframes stroke {
+  100% { stroke-dashoffset: 0; }
+}
+
+.payment-success h2 {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.75rem;
+  font-weight: 400;
+  color: var(--pencil);
+  margin: 0 0 0.5rem;
+}
+
+.payment-success p {
+  font-size: 1rem;
+  color: var(--sepia);
+}

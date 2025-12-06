@@ -440,7 +440,7 @@ export default function DraftingTable() {
 
       {/* Footer */}
       <footer className="drafting-footer">
-        <span>Nano Banana Pro · Gemini 3 Pro Image</span>
+        <span>Product Placement Studio</span>
         <span>4pm Paris Light</span>
       </footer>
     </div>

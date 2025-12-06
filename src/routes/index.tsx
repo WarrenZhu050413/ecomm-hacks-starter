@@ -3,7 +3,11 @@
  *
  * URL patterns:
  * - / → OnboardingFlow (create/select config)
+ * - /console → ProductPlacement (advertiser console)
+ * - /consumer → Consumer demo (EphemeralCanvas with product features)
+ * - /consumer/debug → Consumer demo with debug mode
  * - /prototype → Paris Drafting Table (product placement testing)
+ * - /prototype/v2 → DraftingTableV2
  * - /:configSlug → NewSessionRoute (prompts for name, creates session)
  * - /:configSlug/:sessionSlug → CanvasRoute (loads and renders canvas)
  * - * → NotFound
@@ -11,6 +15,7 @@
 
 import { createBrowserRouter } from 'react-router-dom'
 import OnboardingFlow from '@/components/OnboardingFlow'
+import { ConsumerRoute } from './ConsumerRoute'
 import { NewSessionRoute } from './NewSessionRoute'
 import { CanvasRoute } from './CanvasRoute'
 import { NotFound } from './NotFound'
@@ -34,6 +39,14 @@ export const router = createBrowserRouter([
   {
     path: '/advertiser',
     element: <AdvertiserConsole />,
+  },
+  {
+    path: '/consumer',
+    element: <ConsumerRoute />,
+  },
+  {
+    path: '/consumer/debug',
+    element: <ConsumerRoute debugMode />,
   },
   {
     path: '/prototype',

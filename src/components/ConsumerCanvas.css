@@ -1,0 +1,242 @@
+/**
+ * ConsumerCanvas - Main consumer-facing interface styles
+ *
+ * Aesthetic: 4pm Paris light, warm amber tones, matte paper, artist's drafting table
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;500;600&family=DM+Sans:wght@400;500;600&display=swap');
+
+/* CSS Variables */
+:root {
+  --cream: #FAF8F3;
+  --cream-dark: #F0EDE5;
+  --sepia: #8b7355;
+  --sepia-light: #a08b70;
+  --pencil: #4a4a48;
+  --pencil-light: #6a6a68;
+  --vermillion: #c94c4c;
+  --vermillion-dark: #a83c3c;
+  --golden: #d4a574;
+  --golden-light: #e8c49a;
+  --shadow: rgba(74, 74, 72, 0.12);
+  --shadow-strong: rgba(74, 74, 72, 0.2);
+}
+
+/* Main Container */
+.consumer-canvas {
+  min-height: 100vh;
+  background: var(--cream);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--pencil);
+  position: relative;
+}
+
+/* Paper texture overlay */
+.consumer-canvas::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Header */
+.consumer-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 2rem;
+  background: rgba(250, 248, 243, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(139, 115, 85, 0.1);
+  z-index: 100;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-title {
+  font-family: 'Crimson Pro', serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--sepia);
+  letter-spacing: 0.02em;
+}
+
+.debug-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.25rem 0.5rem;
+  background: var(--vermillion);
+  color: white;
+  border-radius: 4px;
+}
+
+/* Bag Button */
+.bag-button {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(139, 115, 85, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bag-button:hover {
+  background: rgba(139, 115, 85, 0.08);
+  border-color: rgba(139, 115, 85, 0.3);
+}
+
+.bag-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--sepia);
+}
+
+.bag-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vermillion);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 9px;
+  padding: 0 5px;
+  animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pop-in {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+/* Scenes Grid */
+.scenes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  .scenes-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+}
+
+/* Scene Card */
+.scene-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px var(--shadow);
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.scene-card:hover {
+  box-shadow: 0 12px 48px var(--shadow-strong);
+  transform: translateY(-2px);
+}
+
+.scene-card.hovered {
+  box-shadow: 0 16px 56px var(--shadow-strong);
+}
+
+.scene-image {
+  width: 100%;
+  display: block;
+  transition: filter 0.3s ease;
+}
+
+/* Subtle highlight overlay when product is hovered */
+.scene-highlight {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--highlight-x, 50%) var(--highlight-y, 50%),
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+  animation: highlight-pulse 2s ease-in-out infinite;
+}
+
+@keyframes highlight-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Debug Overlay */
+.debug-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 0.75rem;
+  font-family: 'SF Mono', Monaco, monospace;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Debug Controls Panel */
+.debug-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 0.8rem;
+  z-index: 1000;
+  backdrop-filter: blur(12px);
+  min-width: 200px;
+}
+
+.debug-controls h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--golden);
+}
+
+.debug-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.debug-info p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+}

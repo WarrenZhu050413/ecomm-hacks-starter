@@ -828,3 +828,90 @@
   opacity: 0.6;
   animation: pulse-glow 1s ease-in-out infinite;
 }
+
+/* Shopping Bag Button */
+.canvas-action-btn.bag-btn {
+  position: relative;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.canvas-action-btn.bag-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.canvas-action-btn.bag-btn.has-items {
+  background: rgba(139, 115, 85, 0.3);
+  border-color: rgba(139, 115, 85, 0.5);
+}
+
+.bag-count-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: #c84b31;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Product Card Hover States */
+.image-card-content.has-product img {
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.image-card-content.has-product.product-hovered img {
+  filter: brightness(1.05);
+}
+
+/* Subtle product highlight overlay */
+.product-highlight-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.5rem;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: product-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes product-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Product card with hover - add subtle border glow */
+.image-card-content.has-product.product-hovered {
+  position: relative;
+}
+
+.image-card-content.has-product.product-hovered::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1),
+    transparent 50%,
+    rgba(255, 255, 255, 0.05)
+  );
+  pointer-events: none;
+  z-index: -1;
+}

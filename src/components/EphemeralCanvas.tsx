@@ -18,6 +18,44 @@ import {
   type CardData,
   type CardTheme,
 } from '@/services/api'
+import { ShoppingBag } from './ShoppingBag'
+import { ProductOverlay } from './ProductOverlay'
+import { PaymentScreen } from './PaymentScreen'
+import type { Product, BagItem, PaymentInfo } from './ConsumerCanvas'
+
+// Sample product-placed images for demo
+const SAMPLE_PRODUCT_CARDS: Array<{
+  imageUrl: string
+  maskUrl: string
+  product: Product
+}> = [
+  {
+    imageUrl: '/src/prototypes/product-outline-integration/integrated_scene.png',
+    maskUrl: '/src/prototypes/product-outline-integration/mask.png',
+    product: {
+      id: 'prada-galleria',
+      name: 'Galleria Saffiano Bag',
+      brand: 'Prada',
+      price: 3200,
+      currency: 'USD',
+      imageUrl: '/prototype-assets/products/prada-1.jpg',
+      description: 'Iconic saffiano leather tote with gold hardware',
+    },
+  },
+  {
+    imageUrl: '/src/prototypes/product-outline-integration/integrated_scene_0.png',
+    maskUrl: '/src/prototypes/product-outline-integration/mask_0.png',
+    product: {
+      id: 'lv-neverfull',
+      name: 'Neverfull MM',
+      brand: 'Louis Vuitton',
+      price: 2030,
+      currency: 'USD',
+      imageUrl: '/prototype-assets/products/prada-2.jpg',
+      description: 'Monogram canvas tote with removable pouch',
+    },
+  },
+]
 import {
   saveSnapshot,
   loadSnapshot,
@@ -102,6 +140,9 @@ interface FloatingCard {
   isUserCreated: boolean
   directive?: string // The creative direction used to generate this card
   pinned?: boolean // Pinned cards don't fade or move
+  // Product placement data (for shoppable image cards)
+  product?: Product
+  maskUrl?: string // White = product area for hit detection
 }
 
 interface DragState {
@@ -187,6 +228,24 @@ export default function EphemeralCanvas({
   // Snapshots browser state
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
 
+  // Shopping bag state
+  const [bag, setBag] = useState<BagItem[]>([])
+  const [showBag, setShowBag] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(() => {
+    const saved = localStorage.getItem('ephemeral-payment-info')
+    return saved ? JSON.parse(saved) : null
+  })
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false)
+
+  // Product hover state
+  const [activeProduct, setActiveProduct] = useState<{
+    product: Product
+    position: { x: number; y: number }
+    cardId: string
+  } | null>(null)
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null)
+
   // Refs
   const inputRef = useRef<HTMLInputElement>(null)
   const chatInputRef = useRef<HTMLInputElement>(null)
@@ -197,6 +256,12 @@ export default function EphemeralCanvas({
   const userCompositionRef = useRef(userComposition)
   const configRef = useRef(config)
   const { showError } = useErrorToast()
+
+  // Mask detection refs for product hover
+  const maskCanvasRefs = useRef<Map<string, HTMLCanvasElement>>(new Map())
+  const maskImageDataRefs = useRef<Map<string, ImageData>>(new Map())
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const HOVER_DELAY = 800 // ms before showing product card
 
   cardsRef.current = cards
   userCompositionRef.current = userComposition
@@ -247,6 +312,124 @@ export default function EphemeralCanvas({
     }
   }, [cards, userComposition, onStateChange, getCurrentState])
 
+  // Load mask images for product cards (for hover detection)
+  useEffect(() => {
+    cards.forEach((card) => {
+      if (card.maskUrl && !maskCanvasRefs.current.has(card.id)) {
+        const canvas = document.createElement('canvas')
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => {
+          canvas.width = img.width
+          canvas.height = img.height
+          const ctx = canvas.getContext('2d', { willReadFrequently: true })
+          if (ctx) {
+            ctx.drawImage(img, 0, 0)
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+            maskCanvasRefs.current.set(card.id, canvas)
+            maskImageDataRefs.current.set(card.id, imageData)
+          }
+        }
+        img.src = card.maskUrl
+      }
+    })
+  }, [cards])
+
+  // Check if mouse is over product area using mask
+  const isMouseOverProduct = useCallback(
+    (cardId: string, mouseX: number, mouseY: number, imageRect: DOMRect): boolean => {
+      const maskData = maskImageDataRefs.current.get(cardId)
+      const canvas = maskCanvasRefs.current.get(cardId)
+      if (!maskData || !canvas) return false
+
+      // Map mouse position to mask coordinates
+      const scaleX = canvas.width / imageRect.width
+      const scaleY = canvas.height / imageRect.height
+      const maskX = Math.floor((mouseX - imageRect.left) * scaleX)
+      const maskY = Math.floor((mouseY - imageRect.top) * scaleY)
+
+      // Bounds check
+      if (maskX < 0 || maskX >= canvas.width || maskY < 0 || maskY >= canvas.height) {
+        return false
+      }
+
+      // Get pixel brightness (white = product)
+      const pixelIndex = (maskY * canvas.width + maskX) * 4
+      const r = maskData.data[pixelIndex] ?? 0
+      const g = maskData.data[pixelIndex + 1] ?? 0
+      const b = maskData.data[pixelIndex + 2] ?? 0
+      const brightness = (r + g + b) / 3
+
+      return brightness > 128
+    },
+    []
+  )
+
+  // Shopping bag handlers
+  const handleAddToBag = useCallback((product: Product) => {
+    setBag((prev) => {
+      const existing = prev.find((item) => item.product.id === product.id)
+      if (existing) {
+        return prev.map((item) =>
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      }
+      return [...prev, { product, quantity: 1, addedAt: new Date() }]
+    })
+    setActiveProduct(null)
+    setHoveredCardId(null)
+  }, [])
+
+  const handleBuyNow = useCallback(
+    (product: Product) => {
+      handleAddToBag(product)
+      setShowPayment(true)
+    },
+    [handleAddToBag]
+  )
+
+  const handleRemoveFromBag = useCallback((productId: string) => {
+    setBag((prev) => prev.filter((item) => item.product.id !== productId))
+  }, [])
+
+  const handleUpdateQuantity = useCallback(
+    (productId: string, quantity: number) => {
+      if (quantity <= 0) {
+        handleRemoveFromBag(productId)
+        return
+      }
+      setBag((prev) =>
+        prev.map((item) =>
+          item.product.id === productId ? { ...item, quantity } : item
+        )
+      )
+    },
+    [handleRemoveFromBag]
+  )
+
+  const handleSavePaymentInfo = useCallback((info: PaymentInfo) => {
+    setPaymentInfo(info)
+    localStorage.setItem('ephemeral-payment-info', JSON.stringify(info))
+  }, [])
+
+  const handleCompletePurchase = useCallback(() => {
+    setPurchaseSuccess(true)
+    setBag([])
+    setTimeout(() => {
+      setPurchaseSuccess(false)
+      setShowPayment(false)
+    }, 3000)
+  }, [])
+
+  // Calculate bag totals
+  const bagTotal = bag.reduce(
+    (sum, item) => sum + item.product.price * item.quantity,
+    0
+  )
+  const bagCount = bag.reduce((sum, item) => sum + item.quantity, 0)
+
   // Get random seed content
   const getRandomSeed = useCallback((): CardData => {
     const seeds = config.seedContent
@@ -270,6 +453,26 @@ export default function EphemeralCanvas({
       const card = createCard(data, x, y)
       card.isUserCreated = isUserCreated
       card.directive = directive
+      jiggleMultipliers.current.set(card.id, 3.0)
+      setCards((prev) => [...prev, card])
+    },
+    []
+  )
+
+  // Add a product-placed image card
+  const addProductCard = useCallback(
+    (
+      productData: (typeof SAMPLE_PRODUCT_CARDS)[0],
+      x?: number,
+      y?: number
+    ) => {
+      const cardData: CardData = {
+        image_url: productData.imageUrl,
+        caption: `${productData.product.brand} ${productData.product.name}`,
+      }
+      const card = createCard(cardData, x, y)
+      card.product = productData.product
+      card.maskUrl = productData.maskUrl
       jiggleMultipliers.current.set(card.id, 3.0)
       setCards((prev) => [...prev, card])
     },
@@ -443,15 +646,20 @@ export default function EphemeralCanvas({
         onCompositionChange(initialState.userComposition)
       }
     } else {
-      // Fresh start with seed content
+      // Fresh start with seed content + product cards
       const shuffled = [...config.seedContent].sort(() => Math.random() - 0.5)
-      shuffled.slice(0, 4).forEach((data, i) => {
+      shuffled.slice(0, 2).forEach((data, i) => {
         setTimeout(() => addCard(data), i * 600)
+      })
+      // Also spawn product-placed cards for demo
+      SAMPLE_PRODUCT_CARDS.forEach((productData, i) => {
+        setTimeout(() => addProductCard(productData), (i + 2) * 600)
       })
     }
   }, [
     config.seedContent,
     addCard,
+    addProductCard,
     initialState,
     deserializeCards,
     onCompositionChange,
@@ -1116,14 +1324,69 @@ export default function EphemeralCanvas({
       const imageUrl = card.data.thumbnail || card.data.image_url
       const caption = card.data.caption
       const attribution = card.data.attribution
+      const hasProduct = !!card.product && !!card.maskUrl
+
+      // Handle hover for product cards
+      const handleImageMouseMove = (e: React.MouseEvent<HTMLImageElement>) => {
+        if (!hasProduct || !card.product) return
+        const imageEl = e.currentTarget
+        const rect = imageEl.getBoundingClientRect()
+        const overProduct = isMouseOverProduct(card.id, e.clientX, e.clientY, rect)
+
+        if (overProduct && hoveredCardId !== card.id) {
+          setHoveredCardId(card.id)
+          if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current)
+          }
+          hoverTimeoutRef.current = setTimeout(() => {
+            setActiveProduct({
+              product: card.product!,
+              position: { x: e.clientX, y: e.clientY },
+              cardId: card.id,
+            })
+          }, HOVER_DELAY)
+        } else if (!overProduct && hoveredCardId === card.id) {
+          setHoveredCardId(null)
+          if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current)
+          }
+        }
+
+        // Update position if active
+        if (activeProduct && activeProduct.cardId === card.id) {
+          setActiveProduct((prev) =>
+            prev ? { ...prev, position: { x: e.clientX, y: e.clientY } } : null
+          )
+        }
+      }
+
+      const handleImageMouseLeave = () => {
+        if (!hasProduct) return
+        setTimeout(() => {
+          if (!document.querySelector('.product-overlay:hover')) {
+            setHoveredCardId(null)
+            setActiveProduct(null)
+          }
+        }, 100)
+        if (hoverTimeoutRef.current) {
+          clearTimeout(hoverTimeoutRef.current)
+        }
+      }
+
       return (
-        <div className="image-card-content">
+        <div className={clsx('image-card-content', hasProduct && 'has-product', hoveredCardId === card.id && 'product-hovered')}>
           <img
             src={imageUrl}
             alt={caption || 'Image'}
             className="w-full h-auto rounded-lg object-cover max-h-48"
             loading="lazy"
+            onMouseMove={handleImageMouseMove}
+            onMouseLeave={handleImageMouseLeave}
           />
+          {/* Subtle highlight when hovering over product area */}
+          {hoveredCardId === card.id && hasProduct && (
+            <div className="product-highlight-overlay" />
+          )}
           {caption && (
             <div className={clsx(cardTheme.primary, 'mt-2 text-sm')}>
               {caption}
@@ -1313,6 +1576,19 @@ export default function EphemeralCanvas({
             title="Regenerate background"
           >
             🎨
+          </button>
+          {/* Shopping bag button */}
+          <button
+            className={clsx('canvas-action-btn bag-btn', bagCount > 0 && 'has-items')}
+            onClick={() => setShowBag(true)}
+            title="Shopping bag"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 01-8 0" />
+            </svg>
+            {bagCount > 0 && <span className="bag-count-badge">{bagCount}</span>}
           </button>
         </div>
 
@@ -1907,6 +2183,48 @@ export default function EphemeralCanvas({
         }}
         onSave={handleConfigSave}
       />
+
+      {/* Product Overlay - appears on hover over product area in image cards */}
+      {activeProduct && (
+        <ProductOverlay
+          product={activeProduct.product}
+          position={activeProduct.position}
+          onAddToBag={() => handleAddToBag(activeProduct.product)}
+          onBuyNow={() => handleBuyNow(activeProduct.product)}
+          onClose={() => {
+            setActiveProduct(null)
+            setHoveredCardId(null)
+          }}
+        />
+      )}
+
+      {/* Shopping Bag Sidebar */}
+      {showBag && (
+        <ShoppingBag
+          items={bag}
+          onClose={() => setShowBag(false)}
+          onRemove={handleRemoveFromBag}
+          onUpdateQuantity={handleUpdateQuantity}
+          onCheckout={() => {
+            setShowBag(false)
+            setShowPayment(true)
+          }}
+          total={bagTotal}
+        />
+      )}
+
+      {/* Payment Screen */}
+      {showPayment && (
+        <PaymentScreen
+          items={bag}
+          total={bagTotal}
+          savedInfo={paymentInfo}
+          onSaveInfo={handleSavePaymentInfo}
+          onComplete={handleCompletePurchase}
+          onClose={() => setShowPayment(false)}
+          success={purchaseSuccess}
+        />
+      )}
     </div>
   )
 }
