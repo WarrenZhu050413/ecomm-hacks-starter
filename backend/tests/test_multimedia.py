@@ -422,8 +422,8 @@ class TestErrorHandling:
             "/api/media/query",
             json={"prompt": "Describe this", "files": [{"data": "not-valid-base64!!!", "mime_type": "image/png"}]},
         )
-        # Should return 400 or 422 for bad data
-        assert response.status_code in [400, 422, 500]
+        # Should return 400/422 for bad data, or 503 if Gemini rejects it
+        assert response.status_code in [400, 422, 500, 503]
 
     @pytest.mark.anyio
     async def test_unsupported_mime_type_handled(self, client):
@@ -436,7 +436,7 @@ class TestErrorHandling:
             },
         )
         # Should either work (Gemini might handle it) or return clear error
-        assert response.status_code in [200, 400, 422, 500]
+        assert response.status_code in [200, 400, 422, 500, 503]
 
 
 class TestUsageTracking:
