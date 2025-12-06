@@ -82,6 +82,9 @@ Advertisers can then simulate the consumer shopping experience within the consol
 ![](./Consumer_Interface1.webp)
 Consumers can browse posts that they are interested in, as well as write personal thoughts and things they want to see on the left third of the screen.
 
+![](./Consumer_Interface2.png)
+Consumers can hover or click on an item of interest to see its listing, and can either add it to their bag or buy it in one click.
+
 ### Challenges We Faced
 
 - **Visual interfaces within 24 hours**: Attention to detail within user interactions and aesthetics of pages were a definite priority
