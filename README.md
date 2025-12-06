@@ -4,7 +4,7 @@
   <img alt="Ecomm Hacks Banner" src="./static/lightmode.png">
 </picture>
 
-## Your Submission
+## Reverie (Studio Tenwu) 
 
 ### Team Name
 Studio Tenwu
@@ -87,8 +87,8 @@ uv run python test_product_integration.py
 
 ### Challenges We Faced
 
-- **Mask generation**: Nano Banana doesn't output segmentation masks natively. We prompt it to paint the product RED and the rest grayscale, then extract red pixels as a binary mask.
-- **Coordinate mapping**: CSS `object-fit: cover` crops images differently than the mask, requiring offset calculations for accurate hover detection.
+- **Visual interfaces under time pressure**: Attention to detail within user interactions and aesthetics of pages
+- **Coordinate mapping**: CSS `object-fit: cover` crops images differently than the masks, requiring hover detection to consider offset.
 
 ### What's Next
 
