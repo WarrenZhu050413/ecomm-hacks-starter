@@ -47,12 +47,13 @@
 }
 
 .writing-pane-title {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  font-family: 'Italiana', serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0.12em;
   color: var(--pane-title-color);
-  opacity: 0.7;
+  opacity: 1;
 }
 
 /* Editor Toolbar */
