@@ -83,7 +83,7 @@ Advertisers can then simulate the consumer shopping experience within the consol
 Consumers can browse posts that they are interested in, as well as write personal thoughts and things they want to see on the left third of the screen.
 
 ![](./Consumer_Interface2.png)
-Consumers can hover or click on an item of interest to see its listing, and can either add it to their bag or buy it in one click.
+The consumer can hover or click on an item of interest to see its listing, and can either add it to their bag or buy it in one click.
 
 ### Challenges We Faced
 
