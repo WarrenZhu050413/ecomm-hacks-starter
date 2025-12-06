@@ -173,7 +173,7 @@
   padding: 28px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
   animation: pa-slideIn 0.4s ease-out 100ms both;
 }
 
@@ -379,7 +379,7 @@
 }
 
 .pa-semantic-section {
-  flex: 1;
+  /* removed flex: 1 to prevent expansion */
 }
 
 .pa-semantic-input {
@@ -407,7 +407,6 @@
 }
 
 .pa-button-group {
-  margin-top: auto;
   padding-bottom: 24px;
   display: flex;
   flex-direction: column;
