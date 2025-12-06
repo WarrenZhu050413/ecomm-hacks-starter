@@ -1164,12 +1164,12 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
         value={userComposition}
         onChange={setUserComposition}
         width={writingPaneWidth}
-        title="Your Mood"
+        title="Reverie"
         placeholder="Describe the vibe you're looking for..."
         accentColor="#c9a227"
         background="rgba(30, 28, 26, 0.95)"
         textColor="#e8e4d9"
-        titleColor="rgba(255, 255, 255, 0.6)"
+        titleColor="#c9a227"
       />
 
       {/* Resize Divider */}

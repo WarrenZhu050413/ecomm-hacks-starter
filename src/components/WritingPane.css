@@ -47,12 +47,13 @@
 }
 
 .writing-pane-title {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.05em;
   color: var(--pane-title-color);
-  opacity: 0.7;
+  opacity: 1;
 }
 
 /* Editor Toolbar */
