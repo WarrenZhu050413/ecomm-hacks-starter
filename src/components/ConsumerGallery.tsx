@@ -922,6 +922,13 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     const card = cards.find(c => c.id === cardId)
     if (!card) return
 
+    // Don't start drag if clicking on product area
+    const cardElement = e.currentTarget as HTMLElement
+    const rect = cardElement.getBoundingClientRect()
+    if (isMouseOverProductArea(cardId, e.clientX, e.clientY, rect)) {
+      return // Don't start dragging when clicking on product
+    }
+
     setDraggingCardId(cardId)
     dragStartRef.current = {
       x: e.clientX,
@@ -929,7 +936,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
       cardX: card.x,
       cardY: card.y,
     }
-  }, [cards])
+  }, [cards, isMouseOverProductArea])
 
   const handleDragMove = useCallback((e: MouseEvent) => {
     const dragStart = dragStartRef.current
@@ -1088,22 +1095,11 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
     })
   }, [])
 
-  const handleBuyNow = useCallback((product: Product) => {
-    // Add product to bag and show payment screen
-    setBag(prev => {
-      const existing = prev.find(item => item.product.id === product.id)
-      if (existing) {
-        return prev.map(item =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      }
-      return [...prev, { product, quantity: 1, addedAt: new Date() }]
-    })
+  const handleBuyNow = useCallback(() => {
+    // Buy Now confirmation handled in ProductOverlay
+    // Just close the popup when confirmation is dismissed
     setActiveProduct(null)
     setProductClickLocked(false)
-    setShowPayment(true)
   }, [])
 
   const handleRemoveFromBag = useCallback((productId: string) => {
@@ -1269,7 +1265,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
                 width: card.width,
                 height: card.height,
                 opacity: card.opacity,
-                transform: `translate(-50%, 0) scale(${draggingCardId === card.id ? 1.05 : (card.isHovered && productHoverCardId !== card.id) ? 1.02 : card.scale})`,
+                transform: `translate(-50%, 0) scale(${draggingCardId === card.id ? 1.05 : card.isHovered ? 1.02 : card.scale})`,
                 zIndex: draggingCardId === card.id ? 100 : undefined,
                 cursor: draggingCardId === card.id ? 'grabbing' : 'grab',
                 ...maskStyle,
@@ -1371,7 +1367,7 @@ export function ConsumerGallery({ debugMode = false }: ConsumerGalleryProps) {
           productBounds={activeProduct.productBounds}
           sceneImageUrl={activeProduct.sceneImageUrl}
           onAddToBag={() => handleAddToBag(activeProduct.product, activeProduct.cardId)}
-          onBuyNow={() => handleBuyNow(activeProduct.product)}
+          onBuyNow={handleBuyNow}
           onClose={() => {
             setActiveProduct(null)
             setProductClickLocked(false)
