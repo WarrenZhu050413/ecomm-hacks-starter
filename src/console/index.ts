@@ -1,5 +1,5 @@
 /**
- * Console module - Advertiser tools and testing interfaces
+ * Console module - Product placement console
  */
 
-export { ProductPlacement, Console, ParisianAtelier, AdvertiserConsole } from './product-placement'
+export { Console } from './product-placement'

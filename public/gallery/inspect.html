@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery Product Inspection</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #e8e4d9;
+      padding: 40px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+      gap: 30px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #2a2a2a;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #3a3a3a;
+    }
+    .card-header {
+      padding: 16px 20px;
+      background: #333;
+      border-bottom: 1px solid #3a3a3a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .card-header h2 {
+      font-size: 14px;
+      font-weight: 500;
+      color: #c9a227;
+    }
+    .card-header .index {
+      font-size: 12px;
+      color: #888;
+      font-family: monospace;
+    }
+    .images {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      background: #1a1a1a;
+    }
+    .image-container {
+      position: relative;
+      background: #222;
+    }
+    .image-container img {
+      width: 100%;
+      height: 250px;
+      object-fit: contain;
+      display: block;
+    }
+    .image-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      font-size: 11px;
+      padding: 6px 10px;
+      text-align: center;
+    }
+    .info {
+      padding: 20px;
+    }
+    .info-row {
+      display: flex;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .info-row .label {
+      width: 100px;
+      color: #888;
+      flex-shrink: 0;
+    }
+    .info-row .value {
+      color: #e8e4d9;
+    }
+    .info-row .value.brand {
+      color: #c9a227;
+      font-weight: 500;
+    }
+    .info-row .value.price {
+      color: #7cb342;
+    }
+    .file-path {
+      font-family: monospace;
+      font-size: 11px;
+      color: #666;
+      word-break: break-all;
+    }
+    .status {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #3a3a3a;
+    }
+    .status-item {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-right: 8px;
+    }
+    .status-ok {
+      background: rgba(124, 179, 66, 0.2);
+      color: #7cb342;
+    }
+    .status-warning {
+      background: rgba(255, 167, 38, 0.2);
+      color: #ffa726;
+    }
+    .status-error {
+      background: rgba(239, 83, 80, 0.2);
+      color: #ef5350;
+    }
+  </style>
+</head>
+<body>
+  <h1>GALLERY PRODUCT INSPECTION</h1>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const manifest = [
+      {
+        "id": "gallery-0",
+        "sceneUrl": "/gallery/scene_0.png",
+        "baseUrl": "/gallery/base_0.jpg",
+        "maskUrl": "/gallery/mask_0.png",
+        "productImageUrl": "/gallery/product_0.jpg",
+        "product": {
+          "id": "product-0",
+          "name": "Neverfull MM",
+          "brand": "Louis Vuitton",
+          "price": 2030,
+          "currency": "USD",
+          "description": "Iconic tote in Monogram canvas"
+        }
+      },
+      {
+        "id": "gallery-1",
+        "sceneUrl": "/gallery/scene_1.png",
+        "baseUrl": "/gallery/base_1.jpg",
+        "maskUrl": "/gallery/mask_1.png",
+        "productImageUrl": "/gallery/product_1.jpg",
+        "product": {
+          "id": "product-1",
+          "name": "GG Marmont",
+          "brand": "Gucci",
+          "price": 2350,
+          "currency": "USD",
+          "description": "Matelassé leather shoulder bag"
+        }
+      },
+      {
+        "id": "gallery-2",
+        "sceneUrl": "/gallery/scene_2.png",
+        "baseUrl": "/gallery/base_2.jpg",
+        "maskUrl": "/gallery/mask_2.png",
+        "productImageUrl": "/gallery/product_2.jpg",
+        "product": {
+          "id": "product-2",
+          "name": "Classic Flap",
+          "brand": "Chanel",
+          "price": 8200,
+          "currency": "USD",
+          "description": "Lambskin with gold chain"
+        }
+      },
+      {
+        "id": "gallery-3",
+        "sceneUrl": "/gallery/scene_3.png",
+        "baseUrl": "/gallery/base_3.jpg",
+        "maskUrl": "/gallery/mask_3.png",
+        "productImageUrl": "/gallery/product_3.jpg",
+        "product": {
+          "id": "product-3",
+          "name": "Galleria Saffiano",
+          "brand": "Prada",
+          "price": 3200,
+          "currency": "USD",
+          "description": "Saffiano leather tote"
+        }
+      },
+      {
+        "id": "gallery-4",
+        "sceneUrl": "/gallery/scene_4.png",
+        "baseUrl": "/gallery/base_4.jpg",
+        "maskUrl": "/gallery/mask_4.png",
+        "productImageUrl": "/gallery/product_4.jpg",
+        "product": {
+          "id": "product-4",
+          "name": "Loulou Medium",
+          "brand": "Saint Laurent",
+          "price": 2590,
+          "currency": "USD",
+          "description": "Y-quilted leather bag"
+        }
+      },
+      {
+        "id": "gallery-5",
+        "sceneUrl": "/gallery/scene_5.png",
+        "baseUrl": "/gallery/base_5.jpg",
+        "maskUrl": "/gallery/mask_5.png",
+        "productImageUrl": "/gallery/product_5.jpg",
+        "product": {
+          "id": "product-5",
+          "name": "Triomphe Bag",
+          "brand": "Celine",
+          "price": 2950,
+          "currency": "USD",
+          "description": "Shiny calfskin with clasp"
+        }
+      },
+      {
+        "id": "gallery-6",
+        "sceneUrl": "/gallery/scene_6.png",
+        "baseUrl": "/gallery/base_6.jpg",
+        "maskUrl": "/gallery/mask_6.png",
+        "productImageUrl": "/gallery/product_6.jpg",
+        "product": {
+          "id": "product-6",
+          "name": "Le Pliage",
+          "brand": "Longchamp",
+          "price": 145,
+          "currency": "USD",
+          "description": "Iconic foldable nylon tote"
+        }
+      },
+      {
+        "id": "gallery-7",
+        "sceneUrl": "/gallery/scene_7.png",
+        "baseUrl": "/gallery/base_7.jpg",
+        "maskUrl": "/gallery/mask_7.png",
+        "productImageUrl": "/gallery/product_7.jpg",
+        "product": {
+          "id": "product-7",
+          "name": "Puzzle Bag",
+          "brand": "Loewe",
+          "price": 3650,
+          "currency": "USD",
+          "description": "Geometric calfskin panels"
+        }
+      },
+      {
+        "id": "gallery-8",
+        "sceneUrl": "/gallery/scene_8.png",
+        "baseUrl": "/gallery/base_8.jpg",
+        "maskUrl": "/gallery/mask_8.png",
+        "productImageUrl": "/gallery/product_8.jpg",
+        "product": {
+          "id": "product-8",
+          "name": "Dionysus",
+          "brand": "Gucci",
+          "price": 2980,
+          "currency": "USD",
+          "description": "Tiger head closure bag"
+        }
+      },
+      {
+        "id": "gallery-9",
+        "sceneUrl": "/gallery/scene_9.png",
+        "baseUrl": "/gallery/base_9.jpg",
+        "maskUrl": "/gallery/mask_9.png",
+        "productImageUrl": "/gallery/product_9.jpg",
+        "product": {
+          "id": "product-9",
+          "name": "Peekaboo ISeeU",
+          "brand": "Fendi",
+          "price": 4200,
+          "currency": "USD",
+          "description": "Iconic twist-lock bag"
+        }
+      },
+      {
+        "id": "gallery-10",
+        "sceneUrl": "/gallery/scene_10.png",
+        "baseUrl": "/gallery/base_10.jpg",
+        "maskUrl": "/gallery/mask_10.png",
+        "productImageUrl": "/gallery/product_10.jpg",
+        "product": {
+          "id": "product-10",
+          "name": "Speedy Bandouliere",
+          "brand": "Louis Vuitton",
+          "price": 1640,
+          "currency": "USD",
+          "description": "Iconic Monogram Boston bag"
+        },
+        "warning": "DUPLICATE of product_0.jpg (Neverfull MM)"
+      },
+      {
+        "id": "gallery-11",
+        "sceneUrl": "/gallery/scene_11.png",
+        "baseUrl": "/gallery/base_11.jpg",
+        "maskUrl": "/gallery/mask_11.png",
+        "productImageUrl": "/gallery/product_11.jpg",
+        "product": {
+          "id": "product-11",
+          "name": "Lady Dior",
+          "brand": "Dior",
+          "price": 5500,
+          "currency": "USD",
+          "description": "Cannage-stitched lambskin"
+        },
+        "warning": "DUPLICATE of product_1.jpg (GG Marmont)"
+      },
+      {
+        "id": "gallery-12",
+        "sceneUrl": "/gallery/scene_12.png",
+        "baseUrl": "/gallery/base_12.jpg",
+        "maskUrl": "/gallery/mask_12.png",
+        "productImageUrl": "/gallery/product_12.jpg",
+        "product": {
+          "id": "product-12",
+          "name": "Cabas Phantom",
+          "brand": "Celine",
+          "price": 2100,
+          "currency": "USD",
+          "description": "Soft grained calfskin tote"
+        }
+      }
+    ];
+
+    const grid = document.getElementById('grid');
+
+    manifest.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const warning = item.warning ? `<span class="status-item status-warning">${item.warning}</span>` : '';
+
+      card.innerHTML = `
+        <div class="card-header">
+          <h2>${item.product.brand} - ${item.product.name}</h2>
+          <span class="index">#${index}</span>
+        </div>
+        <div class="images">
+          <div class="image-container">
+            <img src="${item.productImageUrl}" alt="Product">
+            <div class="image-label">Product Image</div>
+          </div>
+          <div class="image-container">
+            <img src="${item.sceneUrl}" alt="Scene">
+            <div class="image-label">Scene (with product placed)</div>
+          </div>
+        </div>
+        <div class="info">
+          <div class="info-row">
+            <span class="label">Brand:</span>
+            <span class="value brand">${item.product.brand}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Name:</span>
+            <span class="value">${item.product.name}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Price:</span>
+            <span class="value price">$${item.product.price.toLocaleString()}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Description:</span>
+            <span class="value">${item.product.description}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Files:</span>
+            <span class="value file-path">${item.productImageUrl}</span>
+          </div>
+          ${warning ? `<div class="status">${warning}</div>` : ''}
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>

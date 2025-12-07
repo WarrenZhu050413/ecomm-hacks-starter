@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState, useRef } from 'react'
-import type { BagItem } from './ConsumerCanvas'
+import type { BagItem } from '../types/consumer'
 import './ShoppingBag.css'
 
 interface ShoppingBagProps {

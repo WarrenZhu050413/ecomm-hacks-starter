@@ -1,0 +1,226 @@
+/**
+ * ConsolePreview - Consumer-like preview styling
+ */
+
+.console-preview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1817 0%, #2d2825 100%);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.console-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.console-preview-header h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #e8e4d9;
+  letter-spacing: -0.01em;
+}
+
+.console-preview-header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.console-preview-bag-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.console-preview-bag-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.console-preview-bag-btn.has-items {
+  background: rgba(201, 162, 39, 0.15);
+  color: #c9a227;
+}
+
+.console-preview-bag-btn .bag-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #c9a227;
+  color: #1a1817;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.console-preview-close-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.console-preview-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* Gallery Grid */
+.console-preview-gallery {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 20px;
+  overflow-y: auto;
+  align-content: start;
+}
+
+.console-preview-gallery::-webkit-scrollbar {
+  width: 8px;
+}
+
+.console-preview-gallery::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.console-preview-gallery::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.console-preview-gallery::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Card */
+.console-preview-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 3/4;
+  cursor: default;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.console-preview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.console-preview-card.over-product {
+  cursor: pointer;
+}
+
+.console-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Product highlight overlay */
+.console-preview-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.console-preview-card.over-product .console-preview-highlight {
+  opacity: 1;
+}
+
+/* Product badge */
+.console-preview-product-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: all 0.2s ease;
+}
+
+.console-preview-card:hover .console-preview-product-badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Empty state */
+.console-preview-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.console-preview-empty h3 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #e8e4d9;
+}
+
+.console-preview-empty p {
+  margin: 0 0 24px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.console-preview-empty .console-preview-close-btn {
+  background: rgba(201, 162, 39, 0.15);
+  color: #c9a227;
+}
+
+.console-preview-empty .console-preview-close-btn:hover {
+  background: rgba(201, 162, 39, 0.25);
+}

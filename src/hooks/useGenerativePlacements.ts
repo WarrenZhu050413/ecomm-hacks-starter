@@ -16,7 +16,7 @@ import {
   type PlacementResult,
   type LikedScene,
 } from '../services/placementApi'
-import type { Product } from '../components/ConsumerCanvas'
+import type { Product } from '../types/consumer'
 
 // === Configuration ===
 

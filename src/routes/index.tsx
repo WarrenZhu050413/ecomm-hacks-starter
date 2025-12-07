@@ -1,53 +1,23 @@
 /**
- * Route definitions for Ephemeral.
+ * Route definitions for Reverie.
  *
  * URL patterns:
- * - / → OnboardingFlow (create/select config)
- * - /console → ProductPlacement (advertiser console)
- * - /consumer → Consumer demo (EphemeralCanvas with product features)
- * - /consumer/debug → Consumer demo with debug mode
- * - /prototype → Paris Drafting Table (product placement testing)
- * - /prototype/v2 → DraftingTableV2
-  * - /:configSlug → NewSessionRoute (prompts for name, creates session)
- * - /:configSlug/:sessionSlug → CanvasRoute (loads and renders canvas)
- * - * → NotFound
+ * - /console → Product placement console
+ * - /gallery → AI-generated scroll-triggered gallery
  */
 
-import { createBrowserRouter } from 'react-router-dom'
-import OnboardingFlow from '@/components/OnboardingFlow'
-import { ConsumerRoute } from './ConsumerRoute'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { GenerativeGalleryRoute } from './GenerativeGalleryRoute'
-import { NewSessionRoute } from './NewSessionRoute'
-import { CanvasRoute } from './CanvasRoute'
-import { NotFound } from './NotFound'
-import DraftingTable from '@/prototypes/paris-drafting-table/DraftingTable'
-import DraftingTableV2 from '@/prototypes/paris-drafting-table/DraftingTableV2'
-import { ProductPlacement, Console, AdvertiserConsole } from '@/console'
+import { Console } from '@/console'
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <OnboardingFlow />,
+    element: <Navigate to="/gallery" replace />,
   },
   {
     path: '/console',
     element: <Console />,
-  },
-  {
-    path: '/console/matrix',
-    element: <ProductPlacement />,
-  },
-  {
-    path: '/advertiser',
-    element: <AdvertiserConsole />,
-  },
-  {
-    path: '/consumer',
-    element: <ConsumerRoute />,
-  },
-  {
-    path: '/consumer/debug',
-    element: <ConsumerRoute debugMode />,
   },
   {
     path: '/gallery',
@@ -58,23 +28,7 @@ export const router = createBrowserRouter([
     element: <GenerativeGalleryRoute debugMode />,
   },
   {
-    path: '/prototype',
-    element: <DraftingTable />,
-  },
-  {
-    path: '/prototype/v2',
-    element: <DraftingTableV2 />,
-  },
-  {
-    path: '/:configSlug',
-    element: <NewSessionRoute />,
-  },
-  {
-    path: '/:configSlug/:sessionSlug',
-    element: <CanvasRoute />,
-  },
-  {
     path: '*',
-    element: <NotFound />,
+    element: <Navigate to="/gallery" replace />,
   },
 ])

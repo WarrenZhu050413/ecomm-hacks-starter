@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import type { PaymentInfo } from './ConsumerCanvas'
+import type { PaymentInfo } from '../types/consumer'
 import './UserProfile.css'
 
 interface UserProfileProps {

@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import type { BagItem, PaymentInfo } from './ConsumerCanvas'
+import type { BagItem, PaymentInfo } from '../types/consumer'
 import './PaymentScreen.css'
 
 interface PaymentScreenProps {

@@ -182,8 +182,7 @@ export function WritingPane({
       <EditorContent editor={editor} className="writing-area" />
 
       <div className="writing-pane-hint">
-        Claude sees your writing + visible cards • Double-click canvas to add
-        your own
+        Your writing will inform the canvas
       </div>
     </div>
   )

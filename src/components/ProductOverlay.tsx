@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import type { Product } from './ConsumerCanvas'
+import type { Product } from '../types/consumer'
 import './ProductOverlay.css'
 
 interface ProductOverlayProps {
@@ -78,25 +78,19 @@ export function ProductOverlay({
     }
   }, [buyNowLoading])
 
-  // Calculate position - to the right of product, vertically centered
+  // Calculate position - relative to mouse cursor (simple and reliable)
   const calculatePosition = () => {
-    const gap = 16
     const cardWidth = 240
     const cardHeight = 260
+    const offset = 8  // Tight offset from cursor
 
-    // If no productBounds, fall back to position-based placement
-    if (!productBounds) {
-      return { left: position.x + gap, top: position.y - cardHeight / 2 }
-    }
+    // Use mouse position with small offset
+    let left = position.x + offset
+    let top = position.y - cardHeight / 2
 
-    // Position to the right of the product bounds, vertically centered
-    const productCenterY = (productBounds.top + productBounds.bottom) / 2
-    let left = productBounds.right + gap
-    let top = productCenterY - cardHeight / 2
-
-    // Flip to left if would overflow right edge
+    // If would overflow right, flip to left of cursor
     if (left + cardWidth > window.innerWidth - 20) {
-      left = productBounds.left - cardWidth - gap
+      left = position.x - cardWidth - offset
     }
 
     // Keep vertically in bounds

@@ -10,6 +10,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import './Console.css'
 import { saveProducts, type ProductsData } from '../../services/placementApi'
+import { ConsolePreview } from './ConsolePreview'
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -106,6 +107,7 @@ interface ScenePlacement {
     id: string
     name: string
     brand: string
+    img: string  // Product image URL for preview
   }
   placementHint?: string
   rationale?: string
@@ -163,17 +165,19 @@ export default function Console() {
   const [generationError, setGenerationError] = useState<string | null>(null)
   const [isDeploying, setIsDeploying] = useState(false)
 
+  // Consumer preview mode
+  const [previewMode, setPreviewMode] = useState(false)
+
   // Modal state (Phase 2)
   const [modalPlacement, setModalPlacement] = useState<ScenePlacement | null>(null)
   const [modalPhase, setModalPhase] = useState<ModalPhase>('idle')
   const [modalError, setModalError] = useState<string | null>(null)
+  const [modalImageRatio, setModalImageRatio] = useState<number>(1) // Dynamic aspect ratio from original image
 
   // Batch placement generation state
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set())
   // Track which scenes are waiting for image generation
-  const [generatingImageIds, setGeneratingImageIds] = useState<Set<string>>(new Set())
-  // Track image generation progress (0-100)
-  const [imageGenProgress, setImageGenProgress] = useState(0)
+  const [_generatingImageIds, setGeneratingImageIds] = useState<Set<string>>(new Set())
 
   // Toast state
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -537,65 +541,55 @@ export default function Console() {
         throw new Error('No scenes generated')
       }
 
-      // Step 2: Generate images one at a time, only show when complete
+      // Step 2: Generate all images in parallel
       setGenerationPhase('generating-images')
-      setImageGenProgress(0)
 
-      const totalImages = scenesData.scenes.length
-      let completedCount = 0
-      let successCount = 0
-      let failCount = 0
+      const imgResponse = await fetch(`${API_BASE}/api/placement/generate-images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scenes: scenesData.scenes.map((scene: { id: string; description: string; mood: string }) => ({
+            scene_id: scene.id,
+            scene_description: scene.description,
+            mood: scene.mood,
+          })),
+        }),
+      })
 
-      for (const scene of scenesData.scenes) {
-        try {
-          const imgResponse = await fetch(`${API_BASE}/api/placement/generate-images`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              scenes: [{
-                scene_id: scene.id,
-                scene_description: scene.description,
-                mood: scene.mood,
-              }],
-            }),
+      if (!imgResponse.ok) {
+        throw new Error(`Image generation failed: ${imgResponse.statusText}`)
+      }
+
+      const imgData = await imgResponse.json()
+      const generatedImages = imgData.images || []
+
+      // Create placements from successful images
+      const newPlacements: ScenePlacement[] = []
+      for (const img of generatedImages) {
+        const scene = scenesData.scenes.find((s: { id: string }) => s.id === img.scene_id)
+        if (scene && img.image_data) {
+          newPlacements.push({
+            sceneId: scene.id,
+            description: scene.description,
+            mood: scene.mood,
+            sceneType: scene.scene_type || 'exploration',
+            imageData: img.image_data,
+            mimeType: img.mime_type,
           })
-
-          if (imgResponse.ok) {
-            const imgData = await imgResponse.json()
-            const img = imgData.images?.[0]
-            if (img) {
-              // Add completed image directly to placements
-              const newPlacement: ScenePlacement = {
-                sceneId: scene.id,
-                description: scene.description,
-                mood: scene.mood,
-                sceneType: scene.scene_type || 'exploration',
-                imageData: img.image_data,
-                mimeType: img.mime_type,
-              }
-              setPlacements(prev => [...prev, newPlacement])
-              successCount++
-            } else {
-              failCount++
-            }
-          } else {
-            failCount++
-          }
-        } catch (e) {
-          console.error(`Failed to generate image for ${scene.id}:`, e)
-          failCount++
         }
+      }
 
-        // Update progress after each image (success or fail)
-        completedCount++
-        setImageGenProgress(Math.round((completedCount / totalImages) * 100))
+      // Add all placements at once
+      if (newPlacements.length > 0) {
+        setPlacements(prev => [...prev, ...newPlacements])
       }
 
       setGenerationPhase('complete')
+      const failCount = scenesData.scenes.length - newPlacements.length
       if (failCount > 0) {
-        showToast(`Generated ${successCount} scenes (${failCount} failed)`)
+        showToast(`Generated ${newPlacements.length} scenes (${failCount} failed)`)
       } else {
-        showToast(`Generated ${successCount} new scenes`)
+        showToast(`Generated ${newPlacements.length} new scenes`)
       }
 
     } catch (err) {
@@ -668,6 +662,7 @@ export default function Console() {
           id: selectedProd.id,
           name: selectedProd.name,
           brand: selectedProd.brand,
+          img: selectedProd.image_url,
         } : undefined,
         placementHint: selection.placement_hint,
         rationale: selection.rationale,
@@ -861,7 +856,7 @@ export default function Console() {
       setPlacements(prev => prev.map(p =>
         p.sceneId === placement.sceneId ? {
           ...p,
-          selectedProduct: selectedProd ? { id: selectedProd.id, name: selectedProd.name, brand: selectedProd.brand } : undefined,
+          selectedProduct: selectedProd ? { id: selectedProd.id, name: selectedProd.name, brand: selectedProd.brand, img: selectedProd.image_url } : undefined,
           placementHint: selection.placement_hint,
           rationale: selection.rationale,
           composedImage: composedImg.image_data,
@@ -1266,16 +1261,13 @@ export default function Console() {
                 <span className="console-btn-loading">
                   <span className="console-btn-spinner" />
                   {generationPhase === 'generating-scenes'
-                    ? 'Creating scenes... ~20s'
-                    : `Generating images... ${imageGenProgress}%`}
+                    ? 'Creating scenes...'
+                    : 'Generating images...'}
                 </span>
                 <span
                   key={generationPhase}
-                  className={`console-btn-progress-bar ${generationPhase === 'generating-scenes' ? 'timed' : ''}`}
-                  style={generationPhase === 'generating-scenes'
-                    ? { animationDuration: '25s' }
-                    : { width: `${imageGenProgress}%`, transition: 'width 0.3s ease-out' }
-                  }
+                  className="console-btn-progress-bar timed"
+                  style={{ animationDuration: generationPhase === 'generating-scenes' ? '20s' : '45s' }}
                 />
               </>
             ) : 'Generate Posts'}
@@ -1305,9 +1297,31 @@ export default function Console() {
         </div>
       </div>
 
-      {/* RIGHT PANEL: Test Placements */}
+      {/* RIGHT PANEL: Test Placements or Consumer Preview */}
       <div className="console-panel-placements">
-        <h2>Test Placements</h2>
+        {previewMode ? (
+          <ConsolePreview
+            placements={placements}
+            onClose={() => setPreviewMode(false)}
+          />
+        ) : (
+          <>
+        <div className="console-placements-header">
+          <h2>Test Placements</h2>
+          {placements.some(p => p.composedImage) && (
+            <button
+              className="console-preview-toggle"
+              onClick={() => setPreviewMode(true)}
+              title="Preview as consumer"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              Preview
+            </button>
+          )}
+        </div>
         <div className="console-placements-container">
           {placements.length === 0 ? (
             <div className="console-empty-state">
@@ -1382,6 +1396,8 @@ export default function Console() {
             </>
           )}
         </div>
+          </>
+        )}
       </div>
 
       {/* Modal */}
@@ -1425,6 +1441,12 @@ export default function Console() {
                   <img
                     src={`data:${modalPlacement.mimeType};base64,${modalPlacement.imageData}`}
                     alt="Original"
+                    onLoad={(e) => {
+                      const img = e.currentTarget
+                      if (img.naturalWidth && img.naturalHeight) {
+                        setModalImageRatio(img.naturalWidth / img.naturalHeight)
+                      }
+                    }}
                   />
                 </div>
                 <div className="console-comparison-item">
@@ -1435,24 +1457,24 @@ export default function Console() {
                       alt="With Placement"
                     />
                   ) : (modalPhase === 'selecting' || modalPhase === 'composing') ? (
-                    <div className="console-generating">
+                    <div className="console-generating" style={{ aspectRatio: modalImageRatio }}>
                       <div className="console-spinner" />
                       <div className="console-modal-progress">
                         <div className="console-progress-bar-container">
                           <div className="console-progress-bar timed" style={{ animationDuration: '25s' }} />
                         </div>
                         <p className="console-progress-status">
-                          {modalPhase === 'selecting' ? 'Selecting best product... ~5s' : 'Composing into scene... ~20s'}
+                          {modalPhase === 'selecting' ? 'Selecting product...' : 'Composing...'}
                         </p>
                       </div>
                     </div>
                   ) : modalPhase === 'error' ? (
-                    <div className="console-error-state">
+                    <div className="console-error-state" style={{ aspectRatio: modalImageRatio }}>
                       <span>⚠️ {modalError || 'Processing failed'}</span>
                       <button onClick={() => runPhase2(modalPlacement)}>Retry</button>
                     </div>
                   ) : (
-                    <div className="console-placeholder-action">
+                    <div className="console-placeholder-action" style={{ aspectRatio: modalImageRatio }}>
                       <p>Click to generate product placement</p>
                       <button className="console-btn console-btn-primary" onClick={() => runPhase2(modalPlacement)}>
                         Generate Placement
